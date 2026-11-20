@@ -86,7 +86,7 @@ cd frontend && npm run c:type && npm run c:lint && npx vitest run && npm run c:t
 
 Baseline em 2026-11-20 (upstream `17fe85b1`, v2.5.3): 164 testes no backend e 60 no frontend, tudo verde. Uma tarefa não pode deixar isso pior.
 
-O `npm run c:lint:css` já vem com **11 erros pré-existentes do upstream**, em `ui/form/button/ui-button.module.css` e `ui/layout/header/ui-header.module.css` (media queries com `em()`, `!important`). Não podem aparecer erros novos. Se você reescrever um desses arquivos, corrija os erros dele.
+O `npm run c:lint:css` tem **8 erros pré-existentes do upstream**, todos em `ui/form/button/ui-button.module.css` (media queries com `em()`, `!important`). O upstream tinha 11; os 3 do header sumiram quando ele foi reescrito. Não podem aparecer erros novos. Se você reescrever um desses arquivos, corrija os erros dele.
 
 Mudanças visuais também passam pelo roteiro em [docs/fork/visual-qa.md](docs/fork/visual-qa.md).
 
