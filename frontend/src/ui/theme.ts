@@ -1,4 +1,4 @@
-import { ActionIcon, Alert, Badge, Button, Card, Combobox, createTheme, EmptyState, Menu, mergeThemeOverrides, NumberFormatter, Paper, Popover, Scroller, SegmentedControl, Tabs, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Button, Card, Combobox, createTheme, EmptyState, Menu, mergeThemeOverrides, NumberFormatter, Paper, Popover, Scroller, SegmentedControl, Tabs, Tooltip } from '@mantine/core';
 import { clsx } from 'clsx';
 import { baseTheme, cssVariablesResolver } from './base-theme';
 import classes from './theme.module.css';
@@ -55,11 +55,6 @@ export const theme = mergeThemeOverrides(
         },
         classNames: (theme, props) => ({
           root: classes.badge,
-        }),
-      }),
-      Text: Text.extend({
-        classNames: (theme, props) => ({
-          root: classes.text,
         }),
       }),
       NumberFormatter: NumberFormatter.extend({

@@ -4,7 +4,10 @@
   border: none;
   padding: 0;
   box-shadow: none;
-  background: color-mix(in srgb, var(--button-bg), transparent 15%);
+  background: light-dark(
+    var(--mantine-color-gray-1),
+    color-mix(in srgb, var(--button-bg), transparent 15%)
+  );
 }
 
 .ui-storage-item-base[data-disabled="true"] {

@@ -21,28 +21,9 @@ body,
   height: 100%;
 }
 
-:root,
-button {
-  text-shadow: 1px 1px 0 light-dark(#0002, #fff2);
-}
-
-:root strong,
-:root b,
-:root th,
-:root h1,
-:root h2,
-:root h3,
-:root h4,
-:root h5,
-:root h6,
-:root .mantine-Badge-label,
-:root .mantine-SegmentedControl-label {
-  text-shadow: none;
-}
-
 :root strong,
 :root b {
-  font-weight: bold;
+  font-weight: 600;
 }
 
 svg.lucide {
@@ -52,6 +33,9 @@ svg.lucide {
 }
 
 :root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
   --focus-width: 4px;
   --focus-color-1: var(--mantine-color-primary-6);
   --focus-color-2: var(--mantine-color-primary-3);

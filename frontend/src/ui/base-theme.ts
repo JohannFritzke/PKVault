@@ -67,36 +67,56 @@ declare module '@mantine/core' {
 }
 
 export const baseTheme = {
-  fontFamily: "'Pixel Operator', sans-serif",
+  // shadcn-like visual language: neutral zinc surfaces, 1px borders, soft shadows, ~8px radius
+  fontFamily: "Arial, Helvetica, sans-serif",
+  fontFamilyMonospace: "ui-monospace, Consolas, 'Courier New', monospace",
+  headings: {
+    fontFamily: "Arial, Helvetica, sans-serif",
+    fontWeight: '600',
+  },
+  defaultRadius: 'md',
   primaryShade: { light: 6, dark: 6 },
   primaryColor: 'primary',
-  white: '#f4eae0', // --mantine-color-white, card/body bg (light) #f0e9e0 '#fef4ea',
-  black: '#3a1e08', // --mantine-color-text, text color (dark)
+  white: '#ffffff', // --mantine-color-white, card bg (light)
+  black: '#09090b', // --mantine-color-text (light)
   // autoContrast: true,
   colors: {
     white: [
-      '#f4f4f4',
-      '#f5f4f2',
-      '#f8f3ee',
-      '#fbf3eb',
-      '#faf6f0',  // --mantine-color-white-4, --mantine-color-body (light)
-      '#f4eae0',  // --mantine-color-white-5
-      '#f0e9e0',  // --mantine-color-white-6
-      '#e4dbd0',
-      '#874605',
-      '#190c00'
+      '#ffffff',
+      '#ffffff',
+      '#fcfcfc',
+      '#fafafa',  // popover bg (light)
+      '#fafafa',  // --mantine-color-white-4, --mantine-color-body (light)
+      '#ffffff',  // --mantine-color-white-5
+      '#f4f4f5',  // --mantine-color-white-6
+      '#e4e4e7',
+      '#52525b',
+      '#09090b'
     ],
     gray: [
-      '#ede2d8',  // Button hover
-      '#e4d9d0',
-      '#ded9cf',  // Progress bg
-      '#cfc4b8',  // --mantine-color-gray-3, card border
-      '#bfb4a8',
-      '#9c9587',
-      '#7b7467',
-      '#565249',
-      '#322f2b',
-      '#0d0d0d'
+      '#f4f4f5',  // Button hover
+      '#f4f4f5',
+      '#e4e4e7',  // Progress bg
+      '#e4e4e7',  // --mantine-color-gray-3, card border
+      '#d4d4d8',
+      '#a1a1aa',
+      '#71717a',
+      '#52525b',
+      '#27272a',
+      '#09090b'
+    ],
+    // zinc-based dark scale: 0 text, 2 dimmed, 4 border, 6 popover/active, 8 paper, 9 body
+    dark: [
+      '#fafafa',
+      '#d4d4d8',
+      '#a1a1aa',
+      '#71717a',
+      '#3f3f46',
+      '#27272a',
+      '#202023',
+      '#18181b',
+      '#111113',
+      '#09090b'
     ],
     // #B6634E / #934E3D
     primary: [
@@ -137,32 +157,32 @@ export const baseTheme = {
     ],
   },
   fontSizes: {
-    xs: rem(12),
-    sm: rem(14),
-    md: rem(16),
-    lg: rem(20),
-    xl: rem(24),
+    xs: rem(11),
+    sm: rem(12),
+    md: rem(14),
+    lg: rem(16),
+    xl: rem(20),
   },
   shadows: {
-    xs: `0 ${rem(1)} 0 rgba(0, 0, 0, 0.05)`,
-    sm: `0 ${rem(2)} 0 rgba(0, 0, 0, 0.05)`,
-    md: `0 ${rem(3)} 0 rgba(0, 0, 0, 0.05)`,
-    lg: `0 ${rem(4)} 0 rgba(0, 0, 0, 0.05)`,
-    xl: `0 ${rem(5)} 0 rgba(0, 0, 0, 0.05)`,
+    xs: `0 ${rem(1)} ${rem(2)} rgba(0, 0, 0, 0.04)`,
+    sm: `0 ${rem(1)} ${rem(2)} rgba(0, 0, 0, 0.06)`,
+    md: `0 ${rem(4)} ${rem(6)} ${rem(-1)} rgba(0, 0, 0, 0.08), 0 ${rem(2)} ${rem(4)} ${rem(-2)} rgba(0, 0, 0, 0.06)`,
+    lg: `0 ${rem(10)} ${rem(15)} ${rem(-3)} rgba(0, 0, 0, 0.1), 0 ${rem(4)} ${rem(6)} ${rem(-4)} rgba(0, 0, 0, 0.08)`,
+    xl: `0 ${rem(20)} ${rem(25)} ${rem(-5)} rgba(0, 0, 0, 0.1), 0 ${rem(8)} ${rem(10)} ${rem(-6)} rgba(0, 0, 0, 0.08)`,
   },
   spacing: {
-    xs: rem(2),
-    sm: rem(4),
-    md: rem(10),
+    xs: rem(4),
+    sm: rem(6),
+    md: rem(12),
     lg: rem(16),
     xl: rem(32)
   },
   radius: {
-    xs: rem(2),
-    sm: rem(4),
-    md: rem(6),
-    lg: rem(10),
-    xl: rem(20),
+    xs: rem(4),
+    sm: rem(6),
+    md: rem(8),
+    lg: rem(12),
+    xl: rem(16),
   },
   breakpoints: {
     xs: '36rem', // rem(576),

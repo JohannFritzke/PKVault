@@ -22,7 +22,7 @@
 }
 
 .paper.paper-border {
-    border-width: calc(0.0625rem * var(--mantine-scale) * 2);
+    border-width: calc(0.0625rem * var(--mantine-scale));
 }
 
 .tabs[data-variant='outline'][data-active='true'] {
@@ -30,7 +30,7 @@
 }
 
 .tabs[data-variant='default'] {
-    --tab-border-width: 0 0 calc(var(--tabs-list-border-width) * 2) 0;
+    --tab-border-width: 0 0 var(--tabs-list-border-width) 0;
 }
 
 .button {
@@ -53,10 +53,6 @@
 
 .badge {
     flex-shrink: 0;
-}
-
-.text:not(strong, b, th):is([data-size='lg'], [data-size='xl']) {
-    text-shadow: 2px 2px 0 light-dark(#0002, #FFF2);
 }
 
 .alert-title, .alert-message {
