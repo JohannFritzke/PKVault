@@ -12,9 +12,6 @@ export const UIFooter: React.FC = () => {
 
     return <Group
         className={classes.uiFooter}
-        data-mantine-color-scheme="light"
-        c='white'
-        bg='primary.6'
         px='md'
         py='xs'
         gap='lg'

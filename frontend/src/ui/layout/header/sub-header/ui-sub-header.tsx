@@ -20,9 +20,6 @@ export function UISubHeader<D extends UISubHeaderTabsData = UISubHeaderTabsData>
         controlsEnabled={isInCurrentPanel}
         variant="pills"
         grow={false}
-        __vars={{
-            '--mantine-color-body': 'var(--mantine-color-primary-7)',
-        }}
         renderTab={({ item }) => <UISubHeaderTab
             key={item.id}
             {...item}

@@ -65,10 +65,10 @@ export const UIHeaderItem: React.FC<UIHeaderItemProps> = ({
       }}
       name={id}
       controlLabel={label}
-      variant='filled'
-      color={selected ? 'primary.6' : 'primary.7'}
+      variant={selected ? 'light' : 'subtle'}
+      color='gray'
       size='compact-sm'
-      h={24}
+      h={28}
       {...focusProps}
       {...controlProps('open')}
       style={{ pointerEvents: selected ? 'none' : undefined }}
@@ -76,7 +76,7 @@ export const UIHeaderItem: React.FC<UIHeaderItemProps> = ({
       leftSection={leftSection}
       noLabelMobileScreen={noLabelMobileScreen}
     >
-      <Text fw='bold' tt='uppercase'>
+      <Text fw={500} c={selected ? 'bright' : 'dimmed'}>
         {children}
       </Text>
     </UIButton>

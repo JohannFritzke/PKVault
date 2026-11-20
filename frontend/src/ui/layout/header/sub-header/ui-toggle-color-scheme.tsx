@@ -18,6 +18,7 @@ export const UIToggleColorScheme: React.FC<Partial<UIActionIconProps>> = (props)
             name='color-scheme'
             controlLabel={label}
             onClick={() => setColorScheme(colorScheme === 'light' ? 'dark' : 'light')}
+            variant='default'
             size={24}
             {...props}
         >

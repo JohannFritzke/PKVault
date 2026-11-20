@@ -1,10 +1,14 @@
 .ui-footer {
-    color-scheme: light;
     flex-shrink: 0;
     z-index: 10;
-    box-shadow: 0 -2px 0 rgb(0 0 0 / 20%);
     overflow: hidden;
-    min-height: var(--frame-border-width);
+    color: var(--mantine-color-dimmed);
+    background-color: var(--mantine-color-body);
+    border-top: 1px solid var(--mantine-color-default-border);
+}
+
+.ui-footer:empty {
+    display: none;
 }
 
 .controls {

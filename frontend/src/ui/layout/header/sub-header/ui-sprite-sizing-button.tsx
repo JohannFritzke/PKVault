@@ -40,8 +40,7 @@ export const UISpriteSizingButton: React.FC<UISpriteSizingButtonProps> = ({ loca
             <UIButton
                 name='sprite-sizing'
                 controlLabel={label}
-                variant='filled'
-                color='primary'
+                variant='default'
                 size='compact-sm'
                 h={24}
                 leftSection={<ScalingIcon />}

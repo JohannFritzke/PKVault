@@ -103,6 +103,11 @@ Mudanças visuais também passam pelo roteiro em [docs/fork/visual-qa.md](docs/f
 ## Decisões do projeto
 
 - Fonte: **Arial** no lugar da pixelada "Pixel Operator" (`base-theme.ts`, `fontFamily`).
+- Identidade visual **neutra, simples e minimalista**:
+  - Header, footer e moldura em cinza-zinco, sem fundo colorido.
+  - O terracota (`primary`) fica só em detalhes: aba ativa, seleção, foco e ações principais.
+  - As cores de tipo, jogo e status (`customTheme`) não mudam.
+- Ideia futura, ainda **não implementar**: abrir os detalhes do pokémon (status etc.) num **dialog modal estilo shadcn** em vez do painel lateral atual.
 - Servidor: PocketBase numa VM Oracle Always Free (AMD micro), atrás de um Caddy com HTTPS e domínio DuckDNS. Login só por OAuth (Google e GitHub).
 - Features planejadas, em ordem:
   1. Detecção automática de saves

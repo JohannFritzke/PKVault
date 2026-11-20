@@ -80,8 +80,7 @@ export const Header: React.FC = () => {
                     size='compact-xs'
                     fz='sm'
                     fw='normal'
-                    color='white'
-                    variant='outline'
+                    variant='default'
                     mx='auto'
                     style={{ alignSelf: 'center' }}
                 >
