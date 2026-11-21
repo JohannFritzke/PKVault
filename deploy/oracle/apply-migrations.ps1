@@ -30,4 +30,4 @@ sudo journalctl -u pocketbase --no-pager -n 15 --since "30 seconds ago"
 '@
 
 # piped through stdin so Windows line endings never reach bash
-$remote | ssh -i $Key $Server "tr -d '' | bash -s"
+$remote | ssh -i $Key $Server "tr -d '\r' | bash -s"
