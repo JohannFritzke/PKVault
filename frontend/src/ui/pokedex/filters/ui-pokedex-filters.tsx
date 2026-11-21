@@ -1,4 +1,4 @@
-import { Card, Stack, Title } from '@mantine/core';
+import { Box, Card, Stack, Title } from '@mantine/core';
 import type React from 'react';
 import { useTranslate } from '../../../translate/i18n';
 import { WithControlsIcons, type WithControlsIconsExtraProps } from '../../interaction/controls/icons/with-controls-icons';
@@ -7,13 +7,16 @@ import { useFocusControls } from '../../interaction/focus-controls/use-focus-con
 import { Focus } from '../../interaction/focus/provider/use-focus-context';
 import { FocusScope } from '../../interaction/focus/scope/focus-scope';
 import { getScrollPadding } from '../../scrollbar-width/util/get-scroll-padding';
+import classes from './ui-pokedex-filters.module.css';
 
 type UIPokedexFiltersProps = {
+    /** species search, shown first */
+    species?: React.ReactNode;
     views: React.ReactNode;
     children: React.ReactNode;
 } & WithControlsIconsExtraProps;
 
-export const UIPokedexFilters: React.FC<UIPokedexFiltersProps> = ({ views, children, ...rest }) => {
+export const UIPokedexFilters: React.FC<UIPokedexFiltersProps> = ({ species, views, children, ...rest }) => {
     const { t } = useTranslate();
 
     const name = 'pokedex-filters';
@@ -36,22 +39,41 @@ export const UIPokedexFilters: React.FC<UIPokedexFiltersProps> = ({ views, child
 
     return <FocusScope id={name} parentNodeId={nodeId}>
         <WithControlsIcons placement='out' icons={controlIcons('open')} {...rest}>
-            <Card {...focusProps} {...controlProps('open')} w='100%' mah='100%' pr={getScrollPadding('md')} style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}>
-                <Card.Section withBorder inheritPadding pt='sm' pb='inherit'>
-                    <Stack>
-                        <Title order={5} ta='center'>{t('dex.filters.views')}</Title>
+            <Card {...focusProps} {...controlProps('open')}
+                w='100%' mah='100%' shadow='none' radius='lg' p='lg'
+                pr={getScrollPadding('lg')}
+                style={{ overflowY: 'auto', scrollbarGutter: 'stable' }}
+            >
+                <Stack gap='lg'>
+                    <Title order={2} className={classes.title}>{t('dex.filters.title')}</Title>
 
+                    {species}
+
+                    <UIPokedexFilterGroup label={t('dex.filters.views')}>
                         {views}
-                    </Stack>
-                </Card.Section>
-                <Card.Section withBorder inheritPadding pt='sm' pb='inherit'>
-                    <Title order={5} ta='center'>{t('dex.filters.title')}</Title>
+                    </UIPokedexFilterGroup>
 
-                    <Stack>
-                        {children}
-                    </Stack>
-                </Card.Section>
+                    {children}
+                </Stack>
             </Card>
         </WithControlsIcons>
     </FocusScope>;
+};
+
+type UIPokedexFilterGroupProps = {
+    label: React.ReactNode;
+    children: React.ReactNode;
+};
+
+/**
+ * Labelled group of filter controls, label styled like the inputs ones.
+ */
+export const UIPokedexFilterGroup: React.FC<UIPokedexFilterGroupProps> = ({ label, children }) => {
+    return <Box role='group' aria-label={typeof label === 'string' ? label : undefined}>
+        <div className={classes.groupLabel}>{label}</div>
+
+        <Stack gap='xs'>
+            {children}
+        </Stack>
+    </Box>;
 };
