@@ -1,4 +1,4 @@
-import { Card } from '@mantine/core';
+import { UISettingsSection } from '../../ui/settings/section/ui-settings-section';
 import type React from "react";
 import { useFormContext, useWatch } from 'react-hook-form';
 import { useSettingsGet } from '../../data/sdk/settings/settings.gen';
@@ -16,7 +16,7 @@ export const SettingsMainRight: React.FC = () => {
 
     const [ saveGlobs ] = useWatch({ control: form.control, name: [ 'savE_GLOBS' ] });
 
-    return <Card>
+    return <UISettingsSection padded>
         <GlobsInputList
             labelList={t('settings.form.saves')}
             labelAddFile={t('settings.form.saves.add-file')}
@@ -30,5 +30,5 @@ export const SettingsMainRight: React.FC = () => {
             limit={200}
             extraValue={settings?.canUploadSaves ? settings.savesUploadsPath : undefined}
         />
-    </Card>;
+    </UISettingsSection>;
 };

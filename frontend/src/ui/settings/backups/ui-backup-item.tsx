@@ -1,7 +1,8 @@
-import { ActionIcon, Table, Text, Tooltip } from '@mantine/core';
+import { ActionIcon, Button, Group, Table, Text, Tooltip } from '@mantine/core';
 import { ArchiveRestoreIcon, TrashIcon } from 'lucide-react';
 import React from 'react';
 import { useTranslate } from '../../../translate/i18n';
+import { renderTime } from '../../../util/render-date-time';
 import { WithControlsIcons } from '../../interaction/controls/icons/with-controls-icons';
 import { getSelectControl } from '../../interaction/focus-controls/common-controls/select-controls';
 import { useFocusControls } from '../../interaction/focus-controls/use-focus-controls';
@@ -82,9 +83,9 @@ export const UIBackupItem: React.FC<UIBackupItemProps> = ({ order, createdAt, pa
         {...controlProps('open')}
         bdrs='md'
     >
-        <Table.Th>
-            <Text>{date.getHours()}h{date.getMinutes()}</Text>
-        </Table.Th>
+        <Table.Td w={1} style={{ whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+            {renderTime(date)}
+        </Table.Td>
 
         <Table.Td>
             <WithControlsIcons placement='out' icons={controlIcons('open')}>
@@ -93,33 +94,39 @@ export const UIBackupItem: React.FC<UIBackupItemProps> = ({ order, createdAt, pa
                 </FocusScope>
             </WithControlsIcons>
         </Table.Td>
-        <Table.Td>
+
+        <Table.Td maw={0} w='40%'>
             <Tooltip label={path}>
-                <Text span>
+                <Text span c='dimmed' fz='xs' ff='monospace' truncate='end' display='block'>
                     {filename}
                 </Text>
             </Tooltip>
         </Table.Td>
 
-        <Table.Td>
-            <UIConfirmPopover label={t('settings.backups.restore')} color='red' action={onRestore}>
-                <Tooltip label='Restore backup'>
+        <Table.Td w={1}>
+            <Group gap='xs' wrap='nowrap' justify='flex-end'>
+                <UIConfirmPopover label={t('settings.backups.restore')} color='red' action={onRestore}>
                     <WithControlsIcons placement='out' icons={controlIcons('restore')}>
-                        <ActionIcon variant='subtle' color='red' {...controlProps('restore')}>
-                            <ArchiveRestoreIcon />
+                        <Button
+                            variant='light'
+                            color='red'
+                            size='compact-sm'
+                            leftSection={<ArchiveRestoreIcon size={14} />}
+                            {...controlProps('restore')}
+                        >
+                            {t('settings.backups.restore')}
+                        </Button>
+                    </WithControlsIcons>
+                </UIConfirmPopover>
+
+                <UIConfirmPopover label={t('action.delete')} color='red' action={onDelete}>
+                    <WithControlsIcons placement='out' icons={controlIcons('delete')}>
+                        <ActionIcon variant='subtle' color='red' aria-label={t('action.delete')} {...controlProps('delete')}>
+                            <TrashIcon size={16} />
                         </ActionIcon>
                     </WithControlsIcons>
-                </Tooltip>
-            </UIConfirmPopover>
-        </Table.Td>
-        <Table.Td>
-            <UIConfirmPopover label={t('action.delete')} color='red' action={onDelete}>
-                <WithControlsIcons placement='out' icons={controlIcons('delete')}>
-                    <ActionIcon variant='subtle' color='red' {...controlProps('delete')}>
-                        <TrashIcon />
-                    </ActionIcon>
-                </WithControlsIcons>
-            </UIConfirmPopover>
+                </UIConfirmPopover>
+            </Group>
         </Table.Td>
     </Table.Tr>;
 };
