@@ -11,6 +11,7 @@ using NSwag;
 using PKVault.Core.backup.routes;
 using PKVault.Core.dex.routes;
 using PKVault.Core.saveinfos.routes;
+using PKVault.Core.savediscovery.routes;
 using PKVault.Core.settings.routes;
 using PKVault.Core.storage.routes;
 using PKVault.Core.warnings.routes;
@@ -34,6 +35,7 @@ public partial class CoreRouter
         typeof(SettingsController),
         typeof(WarningsController),
         typeof(StaticDataController),
+        typeof(SaveDiscoveryController),
     ];
 
     // "GET", "api/static-data/spritesheet/{sheetName}", MethodInfo, (ParameterInfo, Kind)[], "StaticData", "GetSpritesheetImg"

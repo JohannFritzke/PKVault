@@ -300,6 +300,106 @@
         }
       }
     },
+    "/api/save-discovery": {
+      "get": {
+        "tags": [
+          "SaveDiscovery"
+        ],
+        "operationId": "SaveDiscovery_Discover",
+        "parameters": [
+          {
+            "name": "emulatorFolders",
+            "in": "query",
+            "style": "form",
+            "explode": true,
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveDiscoveryResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/save-discovery/add": {
+      "post": {
+        "tags": [
+          "SaveDiscovery"
+        ],
+        "operationId": "SaveDiscovery_Add",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDiscoveredSavesRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/save-discovery/scan": {
+      "post": {
+        "tags": [
+          "SaveDiscovery"
+        ],
+        "operationId": "SaveDiscovery_Scan",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScanFolderRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveDiscoveryResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/save-infos": {
       "get": {
         "tags": [
@@ -4651,6 +4751,256 @@
             "items": {
               "type": "integer"
             }
+          }
+        }
+      },
+      "SaveDiscoveryResultDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "saves",
+          "emulators",
+          "folders",
+          "truncated"
+        ],
+        "properties": {
+          "saves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DiscoveredSaveDTO"
+            }
+          },
+          "emulators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DetectedEmulatorDTO"
+            }
+          },
+          "folders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScannedFolderDTO"
+            }
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "refusal": {
+            "$ref": "#/components/schemas/FolderScanRefusal"
+          }
+        }
+      },
+      "DiscoveredSaveDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "saveId",
+          "version",
+          "generation",
+          "trainerName",
+          "tid",
+          "playTime",
+          "playTimeInSeconds",
+          "fileSize",
+          "lastWriteTime",
+          "source",
+          "alreadyAdded"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "saveId": {
+            "type": "integer"
+          },
+          "version": {
+            "$ref": "#/components/schemas/GameVersion"
+          },
+          "generation": {
+            "type": "integer",
+            "format": "byte"
+          },
+          "trainerName": {
+            "type": "string"
+          },
+          "tid": {
+            "type": "integer"
+          },
+          "sid": {
+            "type": "integer"
+          },
+          "playTime": {
+            "type": "string"
+          },
+          "playTimeInSeconds": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastWriteTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string"
+          },
+          "emulatorId": {
+            "type": "string"
+          },
+          "alreadyAdded": {
+            "type": "boolean"
+          },
+          "isDuplicateOf": {
+            "type": "string"
+          }
+        }
+      },
+      "DetectedEmulatorDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "emulatorId",
+          "name",
+          "installPath",
+          "portable",
+          "saveFolders"
+        ],
+        "properties": {
+          "emulatorId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "installPath": {
+            "type": "string"
+          },
+          "configPath": {
+            "type": "string"
+          },
+          "portable": {
+            "type": "boolean"
+          },
+          "saveFolders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmulatorSaveFolderDTO"
+            }
+          }
+        }
+      },
+      "EmulatorSaveFolderDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "origin"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/EmulatorSaveFolderOrigin"
+          }
+        }
+      },
+      "EmulatorSaveFolderOrigin": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "CONFIG_SAVE_PATH",
+          "DEFAULT_SAVE_PATH",
+          "ROM_FOLDER"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      },
+      "ScannedFolderDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "source",
+          "truncated",
+          "filesVisited",
+          "candidatesCount"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "emulatorId": {
+            "type": "string"
+          },
+          "refusal": {
+            "$ref": "#/components/schemas/FolderScanRefusal"
+          },
+          "truncated": {
+            "type": "boolean"
+          },
+          "filesVisited": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "candidatesCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FolderScanRefusal": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "INVALID_PATH",
+          "NOT_FOUND",
+          "DRIVE_ROOT",
+          "SYSTEM_FOLDER",
+          "HOME_FOLDER"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "AddDiscoveredSavesRequestDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "paths"
+        ],
+        "properties": {
+          "paths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ScanFolderRequestDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
           }
         }
       },

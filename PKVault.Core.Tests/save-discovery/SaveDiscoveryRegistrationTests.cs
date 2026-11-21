@@ -14,8 +14,7 @@ public class SaveDiscoveryRegistrationTests
     public void AddSaveDiscovery_ResolvesControllerAndAllDetectors()
     {
         var services = new ServiceCollection();
-        Program.ConfigureServices(services);
-        services.AddSaveDiscovery();
+        Program.ConfigureServices(services); // registers AddSaveDiscovery()
         using var sp = services.BuildServiceProvider();
         using var scope = sp.CreateScope();
 

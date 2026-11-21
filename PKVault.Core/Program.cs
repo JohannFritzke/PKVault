@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PKVault.Core.backup.routes;
 using PKVault.Core.dex.routes;
 using PKVault.Core.saveinfos.routes;
+using PKVault.Core.SaveDiscovery;
 using PKVault.Core.settings.routes;
 using PKVault.Core.storage.routes;
 using PKVault.Core.warnings.routes;
@@ -140,6 +141,7 @@ public class Program
         services.AddScoped<SettingsController>();
         services.AddScoped<WarningsController>();
         services.AddScoped<StaticDataController>();
+        services.AddSaveDiscovery();
 
         Log.Information($"Setup services - Finished");
     }
