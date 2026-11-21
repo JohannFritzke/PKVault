@@ -1,8 +1,7 @@
-import { InputWrapper, Stack } from '@mantine/core';
 import type React from "react";
 import { withErrorCatcher } from '../../error/with-error-catcher';
 import type { WithControlsIconsExtraProps } from '../../ui/interaction/controls/icons/with-controls-icons';
-import { UIPokedexFilters } from '../../ui/pokedex/filters/ui-pokedex-filters';
+import { UIPokedexFilterGroup, UIPokedexFilters } from '../../ui/pokedex/filters/ui-pokedex-filters';
 import { FilterAlpha } from './components/filter-alpha';
 import { FilterCaught } from "./components/filter-caught";
 import { FilterFromGames } from "./components/filter-from-games";
@@ -17,25 +16,21 @@ import { FilterViews } from './components/filter-views';
 export const FiltersCard: React.FC<WithControlsIconsExtraProps> = withErrorCatcher('default', (extraProps) => {
 
   return <UIPokedexFilters
+    species={<FilterSpecies />}
     views={<FilterViews />}
     {...extraProps}
   >
-    <FilterSpecies />
+    {/* TODO i18n: 'Status' label is not translated yet (upstream hardcoded) */}
+    <UIPokedexFilterGroup label='Status'>
+      <FilterSeen />
+      <FilterCaught />
+      <FilterOwned />
+      <FilterOwnedShiny />
+      <FilterAlpha />
+    </UIPokedexFilterGroup>
 
-    <InputWrapper label='Status'>
-      <Stack gap='xs'>
-        <FilterSeen />
-        <FilterCaught />
-        <FilterOwned />
-        <FilterOwnedShiny />
-        <FilterAlpha />
-      </Stack>
-    </InputWrapper>
-
-    <Stack gap='sm'>
-      <FilterTypes />
-      <FilterFromGames />
-      <FilterGeneration />
-    </Stack>
+    <FilterGeneration />
+    <FilterTypes />
+    <FilterFromGames />
   </UIPokedexFilters>;
 });

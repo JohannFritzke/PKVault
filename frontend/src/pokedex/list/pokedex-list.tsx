@@ -9,6 +9,7 @@ import { useTranslate } from '../../translate/i18n';
 import { UIPokedexMainSection } from '../../ui/pokedex/main/section/ui-pokedex-main-section';
 import { UIPokedexMainSectionHeader } from '../../ui/pokedex/main/section/ui-pokedex-main-section-header';
 import { UIPokedexMain } from '../../ui/pokedex/main/ui-pokedex-main';
+import { UIPokedexSummary } from '../../ui/pokedex/summary/ui-pokedex-summary';
 import type { PopoverTargetChildProps } from '../../ui/popover/target-open-popover';
 import { UISpeciesImgSkeleton } from '../../ui/sprite-img/species-img/ui-species-img-skeleton';
 import { UIGameImg } from '../../ui/sprite-img/ui-game-img';
@@ -26,11 +27,11 @@ export const PokedexList: React.FC<PopoverTargetChildProps> = withErrorCatcher("
   const {
     isPending,
     speciesItemsByGenerationList,
-    // seenCount,
-    // caughtCount,
-    // ownedCount,
-    // shinyCount,
-    // totalCount,
+    seenCount,
+    caughtCount,
+    ownedCount,
+    shinyCount,
+    totalCount,
   } = usePokedexItems();
 
   const ref = useMergedRef(
@@ -51,8 +52,17 @@ export const PokedexList: React.FC<PopoverTargetChildProps> = withErrorCatcher("
     }
   }, []);
 
-  return <Stack h='100%' style={{ flexGrow: 1, overflow: 'hidden' }} {...popoverProps} ref={ref}>
-    <UIPokedexMain mah='100%'>
+  return <Stack h='100%' gap='md' style={{ flexGrow: 1, overflow: 'hidden' }} {...popoverProps} ref={ref}>
+    {!isPending && <UIPokedexSummary
+      seenCount={seenCount}
+      caughtCount={caughtCount}
+      ownedCount={ownedCount}
+      shinyCount={shinyCount}
+      totalCount={totalCount}
+    />}
+
+    {/* min-height 0 lets the grid shrink below the summary tiles and scroll */}
+    <UIPokedexMain mah='100%' mih={0} style={{ flexShrink: 1 }}>
       {!isPending && speciesItemsByGenerationList.length === 0 && <EmptyState
         size='sm'
         icon={<PackageOpenIcon />}

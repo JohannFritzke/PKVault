@@ -1,0 +1,13 @@
+/* labelled filter group: same look as the Mantine input labels of the other filters */
+.group-label {
+    display: block;
+    margin-bottom: calc(var(--mantine-spacing-xs) / 2);
+    font-size: var(--mantine-font-size-sm);
+    font-weight: 500;
+    color: var(--mantine-color-text);
+}
+
+.title {
+    font-size: var(--mantine-font-size-md);
+    font-weight: 600;
+}
