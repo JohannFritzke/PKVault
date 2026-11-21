@@ -1,6 +1,8 @@
-[data-mantine-color-scheme="dark"]
-  .ui-storage-panel-box-list
-  /* stylelint-disable-next-line selector-class-pattern */
-  :global(.mantine-Tabs-tab)[data-variant="pills"] {
-  --tab-hover-color: var(--mantine-color-dark-7);
+/* stylelint-disable-next-line selector-class-pattern */
+.ui-storage-panel-box-list :global(.mantine-Tabs-tab)[data-variant="pills"] {
+  --tab-hover-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+
+  min-height: 26px;
+  padding-inline: var(--mantine-spacing-md);
+  font-weight: 500;
 }

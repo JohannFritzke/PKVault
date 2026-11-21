@@ -52,6 +52,7 @@ export const UIStoragePanelBoxList: React.FC<UIStoragePanelBoxListProps> = ({
             controlsDetailsLabel={t('storage.box.controls-label-details')}
             className={classes.uiStoragePanelBoxList}
             variant='pills'
+            radius='xl'
             value={value}
             data={data}
             onChange={onSelect}
