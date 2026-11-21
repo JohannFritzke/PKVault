@@ -19,7 +19,10 @@ runcmd:
   - mkswap /swapfile
   - swapon /swapfile
   - echo '/swapfile none swap sw 0 0' >> /etc/fstab
-  # open HTTP/HTTPS before Oracle's default REJECT rule, and keep it after reboot
-  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
-  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
-  - netfilter-persistent save
+  # open HTTP/HTTPS right above Oracle's default REJECT rule (its position varies
+  # between image versions), and keep it after reboot
+  - |
+    pos=$(iptables -L INPUT --line-numbers -n | awk '/REJECT/ {print $1; exit}')
+    iptables -I INPUT "${pos:-1}" -m state --state NEW -p tcp --dport 443 -j ACCEPT
+    iptables -I INPUT "${pos:-1}" -m state --state NEW -p tcp --dport 80 -j ACCEPT
+    netfilter-persistent save
