@@ -13,6 +13,7 @@ import { UIButton } from '../ui/form/button/ui-button';
 import { getDesktopFileTypeInfos } from '../ui/form/globs-input/util/get-desktop-file-type-infos';
 import { UITextInput } from '../ui/form/text-input/ui-text-input';
 import { UIDiscoveredSave } from '../ui/saves/discovery/ui-discovered-save';
+import discoveredClasses from '../ui/saves/discovery/ui-discovered-save.module.css';
 import { UISavesContent } from '../ui/saves/ui-saves-content';
 import { UISavesHeader, UISavesScroll, UISavesSection } from '../ui/saves/ui-saves-layout';
 
@@ -127,21 +128,19 @@ export const SaveDiscoveryPage: React.FC = withErrorCatcher('default', () => {
                 </>}
             />
 
-            <Group gap='sm' wrap='nowrap' align='flex-end'>
+            <Group gap='sm' wrap='nowrap' align='flex-end' maw={720} style={{ width: '100%' }}>
+                <div className={discoveredClasses.folderField}>
                 <UITextInput
                     name='discovery-folder'
                     label={t('discovery.folder.label')}
                     placeholder={t('discovery.folder.placeholder')}
                     value={folder}
                     onChange={e => setFolder(e.currentTarget.value)}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter')
-                            scan(folder);
-                    }}
                     onSubmit={() => scan(folder)}
                     submitDisabled={!folder.trim()}
                     submitLoading={scanMutation.isPending}
                 />
+                </div>
 
                 {pickFolder && <UIButton
                     name='discovery-browse'
@@ -154,11 +153,11 @@ export const SaveDiscoveryPage: React.FC = withErrorCatcher('default', () => {
                 </UIButton>}
             </Group>
 
-            {refusal !== undefined && <Alert color='yellow' icon={<TriangleAlertIcon />}>
+            {refusal !== undefined && <Alert variant='outline' color='yellow' icon={<TriangleAlertIcon />}>
                 {t(refusalKeys[ refusal ])}
             </Alert>}
 
-            {truncated && <Alert color='yellow' icon={<TriangleAlertIcon />}>
+            {truncated && <Alert variant='outline' color='yellow' icon={<TriangleAlertIcon />}>
                 {t('discovery.truncated')}
             </Alert>}
 

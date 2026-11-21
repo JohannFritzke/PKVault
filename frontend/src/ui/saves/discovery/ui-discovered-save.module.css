@@ -70,3 +70,13 @@
     font-size: 12px;
     color: var(--mantine-color-dimmed);
 }
+
+/* folder path field on the discovery page: stretch past the controls-icons wrapper */
+.folder-field {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.folder-field > * {
+    width: 100%;
+}
