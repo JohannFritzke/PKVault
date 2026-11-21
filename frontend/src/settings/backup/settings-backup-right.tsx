@@ -90,7 +90,7 @@ export const SettingsBackupRight: React.FC = () => {
             size='sm'
             py='xl'
             icon={<PackageOpenIcon />}
-            title={t('settings.form.saves.empty')}
+            title={t('settings.backups.empty')}
         />}
     >
         {sortedBackups

@@ -12,16 +12,17 @@ import { FilterSeen } from "./components/filter-seen";
 import { FilterSpecies } from "./components/filter-species";
 import { FilterTypes } from "./components/filter-types";
 import { FilterViews } from './components/filter-views';
+import { useTranslate } from '../../translate/i18n';
 
 export const FiltersCard: React.FC<WithControlsIconsExtraProps> = withErrorCatcher('default', (extraProps) => {
+  const { t } = useTranslate();
 
   return <UIPokedexFilters
     species={<FilterSpecies />}
     views={<FilterViews />}
     {...extraProps}
   >
-    {/* TODO i18n: 'Status' label is not translated yet (upstream hardcoded) */}
-    <UIPokedexFilterGroup label='Status'>
+    <UIPokedexFilterGroup label={t('dex.filters.status')}>
       <FilterSeen />
       <FilterCaught />
       <FilterOwned />
