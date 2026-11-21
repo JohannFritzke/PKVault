@@ -1,4 +1,4 @@
-import { rem, type CSSVariablesResolver, type MantineThemeOverride } from '@mantine/core';
+import { defaultVariantColorsResolver, parseThemeColor, rem, virtualColor, type CSSVariablesResolver, type MantineThemeOverride, type VariantColorsResolver } from '@mantine/core';
 
 const customTheme = {
   game: {
@@ -66,6 +66,16 @@ declare module '@mantine/core' {
   }
 }
 
+// Filled primary is white on dark / black on light, so its text must flip too.
+const variantColorResolver: VariantColorsResolver = (input) => {
+  const result = defaultVariantColorsResolver(input);
+  const parsed = parseThemeColor({ color: input.color || input.theme.primaryColor, theme: input.theme });
+  if (input.variant === 'filled' && parsed.color === 'primary' && parsed.shade === undefined) {
+    return { ...result, color: 'var(--mantine-primary-color-contrast)' };
+  }
+  return result;
+};
+
 export const baseTheme = {
   // shadcn-like visual language: neutral zinc surfaces, 1px borders, soft shadows, ~8px radius
   fontFamily: "Arial, Helvetica, sans-serif",
@@ -77,6 +87,7 @@ export const baseTheme = {
   defaultRadius: 'md',
   primaryShade: { light: 6, dark: 6 },
   primaryColor: 'primary',
+  variantColorResolver,
   white: '#ffffff', // --mantine-color-white, card bg (light)
   black: '#09090b', // --mantine-color-text (light)
   // autoContrast: true,
@@ -118,42 +129,59 @@ export const baseTheme = {
       '#111113',
       '#09090b'
     ],
-    // #B6634E / #934E3D
-    primary: [
-      '#f5e5e4',
-      '#f0e8e2',
-      '#ecdeda',
-      '#d5a89d',
-      '#cd9688',
-      '#cd9688',
-      '#B6634E',
-      '#934E3D',
-      '#814435',
-      '#150905'
+    // Neutral primary (shadcn default): near-black on light, near-white on dark.
+    // `primary` is a virtual color, so the same shade index swaps per color scheme.
+    // 3 = focus pulse, 6 = filled/focus, 7 = filled hover
+    primary: virtualColor({ name: 'primary', light: 'primaryLight', dark: 'primaryDark' }),
+    primaryLight: [
+      '#fafafa',
+      '#f4f4f5',  // light variant bg
+      '#e4e4e7',  // light variant hover
+      '#a1a1aa',
+      '#71717a',
+      '#52525b',
+      '#18181b',
+      '#27272a',
+      '#18181b',
+      '#09090b'   // light variant text
     ],
+    primaryDark: [
+      '#fafafa',  // light variant text
+      '#f4f4f5',
+      '#e4e4e7',
+      '#a1a1aa',
+      '#d4d4d8',  // anchor
+      '#e4e4e7',
+      '#fafafa',
+      '#e4e4e7',
+      '#52525b',
+      '#3f3f46'   // light variant bg (darkened)
+    ],
+    // Red: ONLY actions that need care (release, delete, restore). #dc2626
     red: [
-      "#ffeeea",
-      "#f9ddd9",
-      "#e9bab3",
-      "#da958a",
-      "#cd7668",
-      "#c96b5c",
-      "#c35746",
-      "#ac4737",
-      "#9a3e2f",
-      "#883226"
+      '#fef2f2',
+      '#fee2e2',
+      '#fecaca',
+      '#fca5a5',
+      '#f87171',
+      '#ef4444',
+      '#dc2626',
+      '#b91c1c',
+      '#991b1b',
+      '#7f1d1d'
     ],
+    // Blue: ONLY editing. #2563eb
     blue: [
-      "#eaf5ff",
-      "#dae7f6",
-      "#b8cbe3",
-      "#92aed1",
-      "#7395c2",
-      "#5c84b8",
-      "#527eb6",
-      "#426ca1",
-      "#376091",
-      "#275382"
+      '#eff6ff',
+      '#dbeafe',
+      '#bfdbfe',
+      '#93c5fd',
+      '#60a5fa',
+      '#3b82f6',
+      '#2563eb',
+      '#1d4ed8',
+      '#1e40af',
+      '#1e3a8a'
     ],
   },
   fontSizes: {
@@ -198,10 +226,12 @@ export const cssVariablesResolver: CSSVariablesResolver = (theme) => ({
   variables: {
   },
   light: {
+    '--mantine-primary-color-contrast': '#fafafa',
     '--button-hover': 'var(--mantine-color-gray-0)',
     '--mantine-color-disabled': 'var(--mantine-color-white-5)',
   },
   dark: {
+    '--mantine-primary-color-contrast': '#09090b',
     '--mantine-color-disabled-color': 'var(--mantine-color-dark-1)',
   },
 });

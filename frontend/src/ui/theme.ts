@@ -1,5 +1,6 @@
-import { ActionIcon, Alert, Badge, Button, Card, Combobox, createTheme, EmptyState, Menu, mergeThemeOverrides, NumberFormatter, Paper, Popover, Scroller, SegmentedControl, Tabs, Tooltip } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Button, Card, Checkbox, Combobox, createTheme, EmptyState, Indicator, Menu, mergeThemeOverrides, NumberFormatter, Paper, Popover, Scroller, SegmentedControl, Tabs, Tooltip } from '@mantine/core';
 import { clsx } from 'clsx';
+import type React from 'react';
 import { baseTheme, cssVariablesResolver } from './base-theme';
 import classes from './theme.module.css';
 
@@ -33,6 +34,20 @@ export const theme = mergeThemeOverrides(
       Tabs: Tabs.extend({
         classNames: (theme, props) => ({
           tab: classes.tabs,
+        }),
+        // primary is neutral and flips per color scheme, so text on it must flip too
+        styles: (theme, props) => ({
+          root: (props.color ? {} : { '--tabs-text-color': 'var(--mantine-primary-color-contrast)' }) as React.CSSProperties,
+        }),
+      }),
+      Checkbox: Checkbox.extend({
+        styles: (theme, props) => ({
+          root: (props.color || props.iconColor ? {} : { '--checkbox-icon-color': 'var(--mantine-primary-color-contrast)' }) as React.CSSProperties,
+        }),
+      }),
+      Indicator: Indicator.extend({
+        styles: (theme, props) => ({
+          root: (props.color ? {} : { '--indicator-text-color': 'var(--mantine-primary-color-contrast)' }) as React.CSSProperties,
         }),
       }),
       Button: Button.extend({
