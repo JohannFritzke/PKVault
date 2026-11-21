@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg height="128px" viewBox="0 0 128 128" width="128px" xmlns="http://www.w3.org/2000/svg">
-    <path d="m 124 69 c 0 19.648438 -11.4375 37.804688 -30 47.632812 c -18.5625 9.824219 -41.4375 9.824219 -60 0 c -18.5625 -9.828124 -30 -27.984374 -30 -47.632812 z m 0 0" fill="#9c9c9c"/>
-    <path d="m 124 69 c 0 18.21875 -11.4375 35.058594 -30 44.167969 s -41.4375 9.109375 -60 0 s -30 -25.949219 -30 -44.167969 z m 0 0" fill="#f6f5f4"/>
-    <path d="m 124 59 c 0 -19.648438 -11.4375 -37.804688 -30 -47.632812 c -18.5625 -9.824219 -41.4375 -9.824219 -60 0 c -18.5625 9.828124 -30 27.984374 -30 47.632812 z m 0 0" fill="#b6634e"/>
-    <path d="m 4 59 h 120 v 10 h -120 z m 0 0" fill="#393b43"/>
-    <path d="m 80 64 c 0 8.835938 -7.164063 16 -16 16 c -8.835938 0 -16 -7.164062 -16 -16 c 0 -8.835937 7.164062 -16 16 -16 c 8.835937 0 16 7.164063 16 16 z m 0 0" fill="#ffffff" stroke="#393b43" stroke-width="8"/>
+    <defs>
+        <clipPath id="ball">
+            <circle cx="64" cy="64" r="60"/>
+        </clipPath>
+    </defs>
+    <g clip-path="url(#ball)">
+        <rect x="0" y="64" width="128" height="64" fill="#fafafa"/>
+        <path d="M 0 104 Q 64 132 128 104 V 128 H 0 Z" fill="#d4d4d8"/>
+        <rect x="0" y="0" width="128" height="64" fill="#18181b"/>
+        <path d="M 22 0 H 42 V 44 Q 42 56 52 58 V 64 H 22 Z" fill="#facc15"/>
+        <path d="M 106 0 H 86 V 44 Q 86 56 76 58 V 64 H 106 Z" fill="#facc15"/>
+        <rect x="0" y="58" width="128" height="12" fill="#27272a"/>
+    </g>
+    <circle cx="64" cy="64" r="15" fill="#ffffff" stroke="#27272a" stroke-width="8"/>
+    <circle cx="64" cy="64" r="58.5" fill="none" stroke="#52525b" stroke-width="3"/>
 </svg>
