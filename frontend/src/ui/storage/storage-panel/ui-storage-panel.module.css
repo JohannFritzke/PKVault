@@ -16,6 +16,7 @@
 .tabs-section:last-child {
     max-height: calc(100% + var(--card-padding) * 2);
     margin-bottom: calc(var(--card-padding) * -1);
+    flex-grow: 1;
 }
 
 .header {

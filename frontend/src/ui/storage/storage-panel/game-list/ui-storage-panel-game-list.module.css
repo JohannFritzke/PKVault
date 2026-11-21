@@ -18,23 +18,27 @@
   color: var(--mantine-color-text);
 }
 
-/* height chain so the expanded save list can scroll on its own */
+/* when the panel lets it grow, the list fills the height and the actions sit at the bottom */
 .ui-storage-panel-game-list {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   min-height: 0;
 }
 
 .ui-storage-panel-game-list > div {
+  flex: 1 1 auto;
   min-height: 0;
 }
 
 .expanded {
+  /* the tab strip above has an inline flex-grow: 1; outweigh it so the strip keeps its height */
+  flex: 9999 1 auto;
   min-height: 0;
 }
 
 .list {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
