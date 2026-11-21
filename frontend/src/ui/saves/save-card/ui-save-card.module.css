@@ -1,0 +1,101 @@
+.ui-save-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+    min-width: 0;
+    padding: var(--mantine-spacing-lg);
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: var(--mantine-radius-lg);
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+}
+
+.top {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--mantine-spacing-md);
+}
+
+.icon {
+    flex-shrink: 0;
+    width: 44px;
+}
+
+.identity {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.name {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--mantine-spacing-sm);
+    font-size: 13px;
+    color: var(--mantine-color-dimmed);
+}
+
+.actions {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--mantine-spacing-xs);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--mantine-spacing-sm);
+}
+
+.stat {
+    min-width: 0;
+    padding: 8px 10px;
+    border-radius: var(--mantine-radius-md);
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+}
+
+.stat-value {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-xs);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 22px;
+    white-space: nowrap;
+}
+
+.stat-label {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-xs);
+    overflow: hidden;
+    font-size: 12px;
+    color: var(--mantine-color-dimmed);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.path {
+    display: flex;
+    min-width: 0;
+    font-family: var(--mantine-font-family-monospace);
+    font-size: 12px;
+    color: var(--mantine-color-dimmed);
+}
+
+.footer {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-sm);
+    padding-top: var(--mantine-spacing-md);
+    border-top: 1px solid var(--mantine-color-default-border);
+}
