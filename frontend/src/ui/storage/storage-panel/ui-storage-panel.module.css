@@ -1,0 +1,26 @@
+.panel {
+    flex-grow: 1;
+}
+
+.tabs-section {
+    flex-shrink: 1;
+    overflow-y: auto;
+}
+
+.header {
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+
+.content {
+    flex-grow: 1;
+    flex-shrink: 999;
+    overflow: hidden auto;
+    scrollbar-gutter: stable;
+}
+
+.footer {
+    padding-block: var(--mantine-spacing-sm);
+    color: var(--mantine-color-dimmed);
+    font-size: var(--mantine-font-size-xs);
+}

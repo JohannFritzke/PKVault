@@ -1,0 +1,19 @@
+/* stylelint-disable-next-line selector-class-pattern */
+.ui-storage-panel-game-list :global(.mantine-Tabs-list) {
+  padding-inline: var(--mantine-spacing-md);
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.ui-storage-panel-game-list :global(.mantine-Tabs-tab)[data-variant="default"] {
+  font-weight: 500;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.ui-storage-panel-game-list :global(.mantine-Tabs-tab)[data-variant="default"]:not([data-active="true"]) {
+  color: var(--mantine-color-dimmed);
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.ui-storage-panel-game-list :global(.mantine-Tabs-tab)[data-variant="default"]:not([data-active="true"], :disabled):hover {
+  color: var(--mantine-color-text);
+}

@@ -29,11 +29,10 @@ export const UISplitButton: React.FC<UISplitButtonProps> = ({ direction, positio
             fz={10}
             size={10}
             h={160}
-            bdrs={0}
+            bdrs='sm'
             styles={{
                 root: {
-                    borderLeft: 'none',
-                    borderRight: 'none',
+                    boxShadow: 'none',
                     zIndex: 1,
                 },
             }}

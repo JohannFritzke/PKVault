@@ -4,7 +4,7 @@ import { BoxType } from '../../../../data/sdk/model';
 export const getBoxTypeColor = (type: BoxType): MantineColor | undefined => {
     switch (type) {
         case BoxType.Box: return undefined;
-        case BoxType.Party: return 'primary.7';
+        case BoxType.Party: return undefined;
         case BoxType.Daycare: return 'teal';
         case BoxType.Inventory: return 'violet.9';
         default: return 'gray';

@@ -6,6 +6,7 @@ import { UISelect, type UISelectItem } from '../../../form/select/ui-select';
 import { UIBallIcon } from '../../../icon/ui-ball-icon';
 import { UIPokedexIcons } from '../../../pokedex/icons/ui-pokedex-icons';
 import { useCurrentPanel } from '../../storage-content/context/ui-panel-context';
+import classes from './ui-storage-panel-game-list.module.css';
 
 export type UIGameData = {
     id: string;
@@ -37,6 +38,7 @@ export const UIStoragePanelGameList: React.FC<UIStoragePanelGameListProps> = ({
         controlsEnabled={isInCurrentPanel}
         controlsLabel={t('save.controls-label')}
         controlsDetailsLabel={t('save.controls-label-details')}
+        className={classes.uiStoragePanelGameList}
         value={value}
         data={data}
         onChange={onChange}
@@ -47,7 +49,7 @@ export const UIStoragePanelGameList: React.FC<UIStoragePanelGameListProps> = ({
                 value={params.item.id} onClick={opt.reduce} disabled={params.item.disabled}
                 leftSection={<img src={params.item.imgSrc} height={16} />}
                 rightSection={params.item.hasDuplicates && <UIPokedexIcons.Duplicate />}
-                py={4}
+                py={8}
             >
                 <Text component={params.selected ? 'b' : undefined} textWrap='nowrap'>{params.item.label}</Text>
             </Tabs.Tab>
