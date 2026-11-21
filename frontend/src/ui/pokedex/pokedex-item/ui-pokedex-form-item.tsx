@@ -3,6 +3,7 @@ import React from "react";
 import type { Gender } from '../../../data/sdk/model';
 import { UIGender } from '../../icon/ui-gender';
 import { UIPokedexIcons } from '../icons/ui-pokedex-icons';
+import classes from './ui-pokedex-item.module.css';
 
 type UIPokedexFormItemProps = {
   genders: Gender[];
@@ -29,13 +30,7 @@ export const UIPokedexFormItem: React.FC<UIPokedexFormItemProps> = ({
 }) => {
 
   return <Box pos='relative'>
-    <Box
-      style={{
-        filter: isSeen
-          ? undefined
-          : 'brightness(0) opacity(0.4)',
-      }}
-    >
+    <Box className={isSeen ? undefined : classes.silhouette}>
       {children}
     </Box>
 

@@ -32,6 +32,7 @@ export const PokedexItem: React.FC<PokedexItemProps> = withErrorCatcher("item", 
     // form={}
     label={speciesName}
     selected={selected}
+    unseen={!isSeen}
     onClick={onClick}
   >
     {children}

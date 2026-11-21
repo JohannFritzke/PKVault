@@ -17,13 +17,15 @@ export type UIPokedexItemRawProps = {
     form?: string;
     label: string;
     selected?: boolean;
+    /** species not seen yet: muted card, name hidden */
+    unseen?: boolean;
     onClick?: () => void;
     children: React.ReactNode;
 };
 
 export const UIPokedexItemRaw: React.FC<UIPokedexItemRawProps> = ({
     ref: refRoot, id, species, form,
-    label, selected, onClick, children
+    label, selected, unseen, onClick, children
 }) => {
     const { t } = useTranslate();
 
@@ -57,23 +59,27 @@ export const UIPokedexItemRaw: React.FC<UIPokedexItemRawProps> = ({
                 ref={ref}
                 data-dex-item
                 data-selected={selected || undefined}
+                data-unseen={unseen || undefined}
                 variant='default'
                 className={classes.button}
-                bd='none'
                 maw='100%'
             >
-                <Group gap='sm' wrap='wrap'>
-                    {visible
-                        ? children
-                        : React.Children.map(children, (_, i) => <UISpeciesImgSkeleton key={i} animate={false} visible={false} />)}
-                </Group>
+                <Box className={classes.content}>
+                    <Box className={classes.header}>
+                        <span>#{String(species).padStart(4, '0')}</span>
+                        {form && <Badge variant='light' color='gray' size='xs' radius='sm'>{form}</Badge>}
+                    </Box>
 
-                <Box className={classes.species} p='xs' fz='md'>
-                    #{species}
+                    <Group gap='sm' wrap='wrap' justify='center'>
+                        {visible
+                            ? children
+                            : React.Children.map(children, (_, i) => <UISpeciesImgSkeleton key={i} animate={false} visible={false} />)}
+                    </Group>
+
+                    <span className={classes.name} data-unseen={unseen || undefined}>
+                        {unseen ? '???' : label}
+                    </span>
                 </Box>
-                {form && <Box pos='absolute' bottom={0} left={0}>
-                    <Badge variant='transparent' color="blue" size="sm" radius="sm">{form}</Badge>
-                </Box>}
             </Button>
         </Tooltip>
     </WithControlsIcons>;
