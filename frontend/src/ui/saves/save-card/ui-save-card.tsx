@@ -74,7 +74,23 @@ export const UISaveCard: React.FC<UISaveCardProps> = ({
 
     const title = [ id, path ].filter(Boolean).join('\n');
 
-    return <article className={classes.uiSaveCard}>
+    const openProps = controlProps('open');
+    const openOnClick = openProps.onClick;
+
+    return <article
+        className={classes.uiSaveCard}
+        title={title}
+        data-clickable={!disabled && !!onSelect}
+        {...focusProps}
+        {...openProps}
+        // inner buttons (download, delete, edit) keep their own action
+        onClick={openOnClick && ((e: React.MouseEvent<HTMLElement>) => {
+            const owner = (e.target as HTMLElement).closest('[data-focus-key], button, a, input');
+            if (owner && owner !== e.currentTarget && !owner.closest('[data-open-hint]'))
+                return;
+            openOnClick(e as never);
+        })}
+    >
         <div className={classes.top}>
             <Image
                 src={imgSrc}
@@ -141,13 +157,13 @@ export const UISaveCard: React.FC<UISaveCardProps> = ({
         <div className={classes.footer}>
             <WithControlsIcons placement='out' icons={controlIcons('open')}>
                 <Button
+                    component='span'
                     variant='default'
                     size='xs'
                     rightSection={<ArrowRightIcon />}
                     loading={loading}
-                    title={title}
-                    {...focusProps}
-                    {...controlProps('open')}
+                    tabIndex={-1}
+                    data-open-hint
                 >
                     {t('action.open')}
                 </Button>
