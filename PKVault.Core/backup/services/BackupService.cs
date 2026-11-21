@@ -66,8 +66,12 @@ public class BackupService(
             var fileName = GetBackupFilename(startTime, name);
             var bkpZipPath = Path.Combine(bkpPath, fileName);
 
-            await fileIOService.WriteBytes(bkpZipPath, memoryStream.ToArray());
+            var bkpZipContent = memoryStream.ToArray();
+            await fileIOService.WriteBytes(bkpZipPath, bkpZipContent);
             Log.Information($"Write backup to {bkpZipPath}");
+
+            // fork: extra backup destinations (backup-providers/)
+            BackupProviders.BackupProviderHook.NotifyCreated(sp, bkpZipPath, name, startTime, bkpZipContent);
         }
         steptime.Dispose();
 
