@@ -90,7 +90,7 @@ export const UITextInput: React.FC<UITextInputProps> = ({ name, onSubmit, onCanc
                     <XIcon />
                 </ActionIcon>}
 
-                {onSubmit && <ActionIcon size='sm' variant='subtle' color='blue' loading={submitLoading} {...controlProps('submit')}>
+                {onSubmit && <ActionIcon size='sm' variant='subtle' loading={submitLoading} {...controlProps('submit')}>
                     <SendIcon />
                 </ActionIcon>}
             </Group>}

@@ -102,10 +102,10 @@ export const UIBackupItem: React.FC<UIBackupItemProps> = ({ order, createdAt, pa
         </Table.Td>
 
         <Table.Td>
-            <UIConfirmPopover label={t('settings.backups.restore')} color='blue' action={onRestore}>
+            <UIConfirmPopover label={t('settings.backups.restore')} color='red' action={onRestore}>
                 <Tooltip label='Restore backup'>
                     <WithControlsIcons placement='out' icons={controlIcons('restore')}>
-                        <ActionIcon variant='subtle' color='blue' {...controlProps('restore')}>
+                        <ActionIcon variant='subtle' color='red' {...controlProps('restore')}>
                             <ArchiveRestoreIcon />
                         </ActionIcon>
                     </WithControlsIcons>

@@ -23,8 +23,7 @@ export const UIGlobsInputAdd: React.FC<UIGlobsInputAddProps> = ({ name, label, t
     return <UIButton
         name={name}
         controlLabel={label}
-        variant='filled'
-        color={'blue'}
+        variant='default'
         onClick={onAddFn}
         size='compact-sm'
         style={{ flexGrow: 1 }}

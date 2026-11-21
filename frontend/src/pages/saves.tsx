@@ -166,8 +166,7 @@ export const SavesPage: React.FC = withErrorCatcher('default', () => {
                   to: '/settings'
                 })}
                 leftSection={<FolderSearchIcon />}
-                variant='filled'
-                color='blue'
+                variant='default'
                 p='lg'
                 h='auto'
               >
@@ -182,8 +181,7 @@ export const SavesPage: React.FC = withErrorCatcher('default', () => {
                   to: '/settings'
                 })}
                 leftSection={<FolderSearchIcon />}
-                variant='filled'
-                color='blue'
+                variant='default'
                 p='lg'
                 h='auto'
               >

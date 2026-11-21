@@ -186,8 +186,7 @@ export const StoragePanelGameList: React.FC = () => {
                         w={gameExpandedConstants.width}
                         fullWidth
                         mih={60}
-                        variant='filled'
-                        color='blue'
+                        variant='default'
                         styles={{
                             inner: {
                                 flexDirection: 'column',
@@ -212,8 +211,7 @@ export const StoragePanelGameList: React.FC = () => {
                         p='sm'
                         w={gameExpandedConstants.width}
                         mih={60}
-                        variant='filled'
-                        color='blue'
+                        variant='default'
                         styles={{
                             inner: {
                                 flexDirection: 'column',

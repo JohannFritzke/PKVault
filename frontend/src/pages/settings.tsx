@@ -115,7 +115,6 @@ export const SettingsPage: React.FC = withErrorCatcher('default', () => {
                 controlLabel={t('action.submit')}
                 type='submit'
                 variant='filled'
-                color='blue'
                 leftSection={<SaveIcon />}
                 loading={settingsMutation.isPending}
                 disabled={settings?.demoMode || !form.formState.isDirty}

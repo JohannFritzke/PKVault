@@ -91,7 +91,6 @@ const DropdownContent: React.FC<Pick<UISpriteSizingButtonProps, 'localStorageKey
         <Card.Section inheritPadding withBorder py='md' mih={0} mah='100%'>
             <Stack mih={0} mah='100%'>
                 <Slider
-                    color="blue"
                     value={value}
                     onChange={setValue}
                     min={marks[ 0 ]}
