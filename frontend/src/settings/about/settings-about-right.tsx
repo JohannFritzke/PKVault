@@ -1,4 +1,4 @@
-import { Badge, Card, CardSection, Group, Skeleton, Stack, Text } from '@mantine/core';
+import { Badge, Card, CardSection, Group, Skeleton, Stack } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
 import { ExternalLinkIcon, ScrollTextIcon } from 'lucide-react';
 import type React from "react";
@@ -7,7 +7,7 @@ import { getReleaseVersionState } from '../../notification/hooks/use-check-updat
 import { useTranslate } from '../../translate/i18n';
 import { UIButton } from '../../ui/form/button/ui-button';
 import { UIMarkdownRenderer } from '../../ui/markdown-renderer/ui-markdown-renderer';
-import { UICardSectionControl } from '../../ui/storage/storage-panel/card-section-control/ui-card-section-control';
+import classes from '../../ui/settings/ui-settings.module.css';
 import { renderDate } from '../../util/render-date-time';
 import { switchUtil } from '../../util/switch-util';
 
@@ -47,31 +47,31 @@ export const SettingsAboutRight: React.FC = () => {
 
     const isPending = [ settingsQuery, releasesQuery ].some(q => q.isPending && q.isEnabled);
 
-    return <Card>
-        <Card.Section component={UICardSectionControl} inheritPadding withBorder py='sm'>
-            <Group gap='sm'>
-                <ScrollTextIcon />
-                <Text size='lg'>
+    return <Card className={classes.section} radius='lg' shadow='none'>
+        <Card.Section className={classes.sectionHeader}>
+            <ScrollTextIcon size={18} />
+            <div className={classes.sectionHeading}>
+                <h2 className={classes.sectionTitle}>
                     {t('settings.about.changelog.title')}
-                </Text>
-            </Group>
-            <Text c='dimmed' lh={1.1}>
-                {t('settings.about.changelog.title.sub')}
-            </Text>
+                </h2>
+                <div className={classes.sectionDescription}>
+                    {t('settings.about.changelog.title.sub')}
+                </div>
+            </div>
         </Card.Section>
 
-        {isPending && <Skeleton h='100vh' mt='md' />}
+        {isPending && <Skeleton h='100vh' my='md' />}
 
         {!isPending && releasesQuery.data?.map(r => {
             const releaseState = r.name
                 ? getReleaseVersionState(r.name.substring(1), settingsVersion ?? '')
                 : 'same';
 
-            return <CardSection key={r.id} withBorder inheritPadding py='inherit'
+            return <CardSection key={r.id} withBorder inheritPadding py='lg'
                 style={{
                     outline: switchUtil(releaseState, {
                         same: '2px solid var(--mantine-color-primary-filled)',
-                        new: '2px solid var(--mantine-color-blue-filled)',
+                        new: '2px dashed var(--mantine-color-primary-filled)',
                         old: undefined,
                     }),
                     outlineOffset: -2,
@@ -87,22 +87,21 @@ export const SettingsAboutRight: React.FC = () => {
                             controlLabel={t('action.open')}
                             leftSection={<ExternalLinkIcon />}
                             variant={releaseState === 'new' ? 'filled' : 'default'}
-                            color='blue'
                             size='compact-md'
                         >
                             {r.name}
                         </UIButton>
-                        <Badge variant='light' size='lg'>
+                        <Badge variant='default' size='lg'>
                             {r.published_at && renderDate(new Date(r.published_at))}
                         </Badge>
 
                         {releaseState === 'same' && <Badge variant='filled' size='lg' ml='auto'>
                             Current
                         </Badge>}
-                        {releaseState === 'new' && <Badge variant='filled' color='blue' size='lg' ml='auto'>
+                        {releaseState === 'new' && <Badge variant='light' size='lg' ml='auto'>
                             New
                         </Badge>}
-                        {releaseState === 'old' && <Badge variant='filled' color='gray' size='lg' ml='auto'>
+                        {releaseState === 'old' && <Badge variant='outline' color='gray' size='lg' ml='auto'>
                             Old
                         </Badge>}
                     </Group>
