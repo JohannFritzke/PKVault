@@ -1,0 +1,41 @@
+# Form shown by Oracle Resource Manager when creating the stack.
+title: "PokéHome server"
+description: "VM Always Free (AMD micro) with Ubuntu 24.04 and ports 80/443 open, for PocketBase + Caddy."
+schemaVersion: 1.1.0
+version: "20261121"
+locale: "en"
+
+variableGroups:
+  - title: "Server"
+    variables:
+      - ssh_public_key
+      - instance_name
+      - ad_number
+  - title: "Filled in automatically"
+    visible: false
+    variables:
+      - tenancy_ocid
+      - region
+      - compartment_ocid
+
+variables:
+  ssh_public_key:
+    type: oci:core:ssh:publickey
+    title: "SSH public key"
+    description: "Upload or paste the .pub file (never the private key)."
+    required: true
+
+  instance_name:
+    type: string
+    title: "Instance name"
+    default: "pokehome"
+    required: true
+
+  ad_number:
+    type: integer
+    title: "Availability domain"
+    description: "Keep 1. If the job fails with 'Out of host capacity', edit the stack and try 2 or 3."
+    minimum: 1
+    maximum: 3
+    default: 1
+    required: true

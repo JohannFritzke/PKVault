@@ -1,0 +1,25 @@
+#cloud-config
+# First boot of the PokéHome VM: updates, swap (the micro VM has 1 GB RAM)
+# and the host firewall. Oracle's Ubuntu images block 80/443 in iptables
+# even when the security list allows them, so they are opened here.
+
+timezone: America/Sao_Paulo
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - unzip
+  - curl
+
+runcmd:
+  # 2 GB swap
+  - fallocate -l 2G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  # open HTTP/HTTPS before Oracle's default REJECT rule, and keep it after reboot
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - netfilter-persistent save
