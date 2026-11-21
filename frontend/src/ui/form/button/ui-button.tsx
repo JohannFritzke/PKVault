@@ -58,6 +58,7 @@ export const UIButton = function <C = 'button'>({
                 noLabelMobileScreen && classes.noLabelMobileScreen,
                 rest.className,
             )}
+            classNames={{ label: classes.label, section: classes.section }}
             onClick={onClick}
             ref={ref}
             loading={loading}
