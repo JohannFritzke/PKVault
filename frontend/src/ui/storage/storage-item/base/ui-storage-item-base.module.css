@@ -1,12 +1,16 @@
 .ui-storage-item-base {
+  --button-radius: var(--mantine-radius-sm);
+
   position: relative;
   height: auto;
   border: none;
   padding: 0;
   box-shadow: none;
+
+  /* slightly translucent so box wallpapers still show through */
   background: light-dark(
-    var(--mantine-color-gray-1),
-    color-mix(in srgb, var(--button-bg), transparent 15%)
+    color-mix(in srgb, var(--mantine-color-gray-1), transparent 10%),
+    color-mix(in srgb, var(--mantine-color-dark-6), transparent 10%)
   );
 }
 
@@ -16,12 +20,16 @@
 }
 
 .ui-storage-item-base[data-selected="true"] {
-  outline: 4px solid var(--focus-color-1);
+  outline: 2px solid var(--focus-color-1);
 }
 
 .ui-storage-item-base[data-selected="true"]:not([data-disabled="true"]),
 .ui-storage-item-base[data-focused="true"]:not([data-disabled="true"]),
 .ui-storage-item-base:not([data-disabled="true"]):hover {
-  transform: scale(1.02);
   z-index: 1;
+}
+
+/* subtle hover ring, never over the selection or focus outline */
+.ui-storage-item-base:not([data-disabled="true"]):hover:not([data-selected="true"], [data-focused="true"]) {
+  outline: 1px solid var(--mantine-color-default-border);
 }

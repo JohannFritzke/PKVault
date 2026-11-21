@@ -31,7 +31,7 @@ export const UIStorageContent: React.FC<UIStorageContentProps> = ({ id, left, ri
     const getViewportSpeciesSize = () => {
         const containerWidth = viewport.width / 2 - 42.2;
         const nbrItemsPerLine = 6;
-        const gapPx = 4;
+        const gapPx = 6;
         const gapPerItem = gapPx * (nbrItemsPerLine - 1) / nbrItemsPerLine;
         const itemWidth = containerWidth / nbrItemsPerLine - gapPerItem;
         const spriteInitialWidth = 96;
