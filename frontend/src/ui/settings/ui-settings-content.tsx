@@ -1,16 +1,17 @@
-import { Grid, Stack } from '@mantine/core';
 import type React from 'react';
 import { WithControlsIcons } from '../interaction/controls/icons/with-controls-icons';
 import { FocusScope } from '../interaction/focus/scope/focus-scope';
 import { usePanelControls } from '../layout/hooks/use-panel-controls';
+import classes from './ui-settings.module.css';
 
 type UISettingsContentProps = Pick<React.DOMAttributes<HTMLFormElement>, 'onSubmit'> & {
-    left: React.ReactNode;
-    right: React.ReactNode;
+    title: React.ReactNode;
+    description?: React.ReactNode;
+    children: React.ReactNode;
     bottom: React.ReactNode;
 };
 
-export const UISettingsContent: React.FC<UISettingsContentProps> = ({ left, right, bottom, onSubmit }) => {
+export const UISettingsContent: React.FC<UISettingsContentProps> = ({ title, description, children, bottom, onSubmit }) => {
 
     const { panelProps, nodeId, childScopeId, controlIcons } = usePanelControls('settings-content');
 
@@ -25,31 +26,24 @@ export const UISettingsContent: React.FC<UISettingsContentProps> = ({ left, righ
                 display: 'flex',
                 flexDirection: 'column',
                 flexWrap: 'nowrap',
-                gap: 'var(--mantine-spacing-md)',
                 borderRadius: 'var(--mantine-radius-md)',
             }}
             {...panelProps}
         >
-            <Grid
-                mah='100%'
-                overflow='auto'
-                style={{ flexGrow: 1 }}
-                bdrs='md'
-            >
-                <Grid.Col span={{ base: 12, md: 4 }}>
-                    <Stack mah='100%'>
-                        {left}
-                    </Stack>
-                </Grid.Col>
+            <div className={classes.page}>
+                <div className={classes.column}>
+                    <header className={classes.pageHeader}>
+                        <h1 className={classes.pageTitle}>{title}</h1>
+                        {description && <p className={classes.pageDescription}>{description}</p>}
+                    </header>
 
-                <Grid.Col span={{ base: 12, md: 8 }}>
-                    <Stack mah='100%'>
-                        {right}
-                    </Stack>
-                </Grid.Col>
-            </Grid>
+                    {children}
+                </div>
+            </div>
 
-            {bottom}
+            {bottom && <div className={classes.bottomBar}>
+                {bottom}
+            </div>}
         </WithControlsIcons>
     </FocusScope>;
 };

@@ -1,6 +1,6 @@
-import { Button, Card, Center, Group, SimpleGrid, Tabs } from '@mantine/core';
+import { Button, Tabs } from '@mantine/core';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { FileArchiveIcon, FileIcon, FolderArchiveIcon, FolderIcon, FolderTreeIcon, GlobeIcon, PenOffIcon, RefreshCcwIcon, SaveIcon, ShieldOff } from 'lucide-react';
+import { DatabaseZapIcon, FileArchiveIcon, FileIcon, FolderIcon, FolderTreeIcon, GlobeIcon, PenOffIcon, RefreshCcwIcon, SaveIcon, ShieldOff } from 'lucide-react';
 import { DataActionType } from '../../../data/sdk/model';
 import { UIActionsPanel } from '../../actions-panel/ui-actions-panel';
 import { UIGlobsInputItem } from '../../form/globs-input/ui-globs-input-item';
@@ -9,7 +9,6 @@ import { UIGlobsInputResults } from '../../form/globs-input/ui-globs-input-resul
 import { UISelect } from '../../form/select/ui-select';
 import { UISwitch } from '../../form/switch/ui-switch';
 import { UITextInput } from '../../form/text-input/ui-text-input';
-import { UIInputLabel } from '../../form/ui-input-label';
 import { UIBallIcon } from '../../icon/ui-ball-icon';
 import { UIAppLayout } from '../../layout/app-layout/ui-app-layout';
 import { UIFooter } from '../../layout/footer/ui-footer';
@@ -18,6 +17,8 @@ import { WithSettingsCategories as UIHeaderSettingsStory } from '../../layout/he
 import { UIBackupItem } from '../../settings/backups/ui-backup-item';
 import { UIBackupList } from '../../settings/backups/ui-backup-list';
 import { UIBackupsTabList } from '../../settings/backups/ui-backups-tab-list';
+import { UISettingsRow } from '../../settings/section/ui-settings-row';
+import { UISettingsSection } from '../../settings/section/ui-settings-section';
 import { UISettingsContent } from '../../settings/ui-settings-content';
 import { UIPathButton } from '../../form/globs-input/ui-path-button';
 import { UIFileExplorerPopover } from '../../form/globs-input/ui-file-explorer-popover';
@@ -74,23 +75,11 @@ export const Primary: Story = {
         />}
         footer={<UIFooter />}
         children={<UISettingsContent
-            left={<>
-                <Card>
-                    <SimpleGrid cols={2}>
-                        <UIInputLabel leftSection={<UIBallIcon />} label='PKVault' />
-                        <div>v2.0.0 - SteamDeck - Flatpak</div>
-                        <UIInputLabel leftSection={<img src="https://projectpokemon.org/favicon.ico" />} label='PKHeX' />
-                        <div>26.02.26</div>
-                        <UIInputLabel leftSection={<FolderIcon />} label='PKVault path' />
-                        <div>/pkvault</div>
-                        <UIInputLabel leftSection={<FileIcon />} label='Config path' />
-                        <div>/pkvault/config/pkvault.json</div>
-                    </SimpleGrid>
-                </Card>
-
-                <Card>
-                    <SimpleGrid cols={2}>
-                        <UIInputLabel leftSection={<GlobeIcon />} forInput='language' label='Language' />
+            title='General'
+            description='Application settings'
+            children={<>
+                <UISettingsSection>
+                    <UISettingsRow icon={<GlobeIcon />} forInput='language' label='Language'>
                         <UISelect
                             name='language'
                             controlLabel='Change language'
@@ -110,30 +99,26 @@ export const Primary: Story = {
                                 },
                             ]}
                             onChange={console.log}
+                            w={220}
                         />
-                    </SimpleGrid>
-                </Card>
+                    </UISettingsRow>
 
-                <Card>
-                    <SimpleGrid cols={2}>
-                        <UIInputLabel leftSection={<PenOffIcon />} forInput='hide-cheats' label='Hide cheats' />
+                    <UISettingsRow icon={<PenOffIcon />} forInput='hide-cheats' label='Hide cheats' description='Hide settings allowing illegal pokemons'>
                         <UISwitch
                             name='hide-cheats'
                             controlLabel='Hide cheats'
-                            ml='auto'
                         />
+                    </UISettingsRow>
 
-                        <UIInputLabel leftSection={<ShieldOff />} forInput='skip-legality' label='Skip legality checks' />
+                    <UISettingsRow icon={<ShieldOff />} forInput='skip-legality' label='Skip legality checks'>
                         <UISwitch
                             name='skip-legality'
                             controlLabel='Skip legality checks'
-                            ml='auto'
                         />
-                    </SimpleGrid>
-                </Card>
-            </>}
-            right={<>
-                <Card>
+                    </UISettingsRow>
+                </UISettingsSection>
+
+                <UISettingsSection padded>
                     <UIGlobsInputList
                         id='saves'
                         labelList='Saves files locations'
@@ -247,31 +232,26 @@ export const Primary: Story = {
                             </UIFileExplorerPopover>}
                         </UIGlobsInputItem>
                     </UIGlobsInputList>
-                </Card>
+                </UISettingsSection>
+                <UISettingsSection>
+                    <UISettingsRow icon={<UIBallIcon />} label='PKVault'>v2.0.0 - SteamDeck - Flatpak</UISettingsRow>
+                    <UISettingsRow icon={<img src="https://projectpokemon.org/favicon.ico" />} label='PKHeX'>26.02.26</UISettingsRow>
+                    <UISettingsRow icon={<FolderIcon />} label='PKVault path'>/pkvault</UISettingsRow>
+                    <UISettingsRow icon={<FileIcon />} label='Config path'>/pkvault/config/pkvault.json</UISettingsRow>
+                </UISettingsSection>
             </>}
-            bottom={<Center>
-                <Card>
-                    <Group wrap='nowrap'>
-                        <Button
-                            size='compact-md'
-                        >
-                            Cancel
-                        </Button>
+            bottom={<>
+                <Button>
+                    Cancel
+                </Button>
 
-                        <Button
-                            variant='filled'
-                            color='primary'
-                            size='compact-md'
-                            pl='md'
-                            pr='lg'
-                            // disabled={}
-                            leftSection={<SaveIcon />}
-                        >
-                            Save
-                        </Button>
-                    </Group>
-                </Card>
-            </Center>}
+                <Button
+                    variant='filled'
+                    leftSection={<SaveIcon />}
+                >
+                    Save
+                </Button>
+            </>}
         />}
     />,
 };
@@ -319,33 +299,24 @@ export const Backups: Story = {
         />}
         footer={<UIFooter />}
         children={<UISettingsContent
-            left={<>
-                <Card>
-                    <SimpleGrid cols={2}>
-                        <UIInputLabel leftSection={<FolderArchiveIcon />} label='Backups directory' />
-                        <div>/pkvault/backups</div>
-
-                        <UIInputLabel leftSection={<FolderTreeIcon />} label='Backup content' />
-                        <div>All saves + all storage</div>
-
-                        <UIInputLabel leftSection={<RefreshCcwIcon />} label='Auto-backup' />
-                        <div>Before any file write (save)</div>
-
-                        <UIInputLabel leftSection={<FileArchiveIcon />} label='Generic format' />
-                        <div>Can be opened from outside PKVault (.zip)</div>
-                    </SimpleGrid>
-                </Card>
-            </>}
-            right={<UIBackupList
-                header={<UIBackupsTabList
+            title='Backups'
+            description='PKVault creates a backup before each save'
+            children={<>
+            <UIBackupList
+                title='Local backups'
+                description='/pkvault/backups'
+                actions={<Button variant='filled' leftSection={<DatabaseZapIcon />}>
+                    Create backup
+                </Button>}
+                tabs={<UIBackupsTabList
                     value='26/02/2026'
                     onSelect={console.log}
                     scopeId='storage-content'
                 >
-                    <Tabs.Tab value='26/02/2026' p='md'>
+                    <Tabs.Tab value='26/02/2026' py='sm' px='md'>
                         26/02/2026
                     </Tabs.Tab>
-                    <Tabs.Tab value='25/02/2026' p='md'>
+                    <Tabs.Tab value='25/02/2026' py='sm' px='md'>
                         25/02/2026
                     </Tabs.Tab>
                 </UIBackupsTabList>}
@@ -375,30 +346,26 @@ export const Backups: Story = {
                         onCancel={console.log}
                     />
                 </UIBackupItem>)}
-            </UIBackupList>}
-            bottom={<Center>
-                <Card>
-                    <Group wrap='nowrap'>
-                        <Button
-                            size='compact-md'
-                        >
-                            Cancel
-                        </Button>
+            </UIBackupList>
 
-                        <Button
-                            variant='filled'
-                            color='primary'
-                            size='compact-md'
-                            pl='md'
-                            pr='lg'
-                            // disabled={}
-                            leftSection={<SaveIcon />}
-                        >
-                            Save
-                        </Button>
-                    </Group>
-                </Card>
-            </Center>}
+            <UISettingsSection>
+                <UISettingsRow icon={<FolderTreeIcon />} label='Backup content' description='All saves + all storage' />
+                <UISettingsRow icon={<RefreshCcwIcon />} label='Auto-backup' description='Before any file write (save)' />
+                <UISettingsRow icon={<FileArchiveIcon />} label='Generic format' description='Can be opened from outside PKVault (.zip)' />
+            </UISettingsSection>
+            </>}
+            bottom={<>
+                <Button>
+                    Cancel
+                </Button>
+
+                <Button
+                    variant='filled'
+                    leftSection={<SaveIcon />}
+                >
+                    Save
+                </Button>
+            </>}
         />}
     />,
 };

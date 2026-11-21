@@ -1,4 +1,5 @@
-import { Card, Group } from '@mantine/core';
+import { Group } from '@mantine/core';
+import { UISettingsSection } from '../../ui/settings/section/ui-settings-section';
 import { ExternalLinkIcon } from 'lucide-react';
 import type React from "react";
 import { useFormContext, useWatch } from 'react-hook-form';
@@ -17,7 +18,7 @@ export const SettingsExternalRight: React.FC = () => {
 
     const [ pkmExternalGlobs ] = useWatch({ control: form.control, name: [ 'pkM_EXTERNAL_GLOBS' ] });
 
-    return <Card>
+    return <UISettingsSection padded>
         <GlobsInputList
             labelList={<Group>
                 {t('settings.form.pkms-external')}
@@ -32,5 +33,5 @@ export const SettingsExternalRight: React.FC = () => {
             disabled={!settings?.canUpdateSettings}
             limit={1200}
         />
-    </Card>;
+    </UISettingsSection>;
 };

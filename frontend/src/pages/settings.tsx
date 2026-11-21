@@ -1,4 +1,3 @@
-import { Card, Center, Group, Stack } from '@mantine/core';
 import { SaveIcon } from 'lucide-react';
 import React from "react";
 import { FormProvider, useForm } from 'react-hook-form';
@@ -14,6 +13,7 @@ import { SettingsExternalLeft } from '../settings/external/settings-external-lef
 import { SettingsExternalRight } from '../settings/external/settings-external-right';
 import { SettingsMainLeft } from '../settings/main/settings-main-left';
 import { SettingsMainRight } from '../settings/main/settings-main-right';
+import { SettingsMainSystem } from '../settings/main/settings-main-system';
 import { useTranslate } from '../translate/i18n';
 import { UIButton } from '../ui/form/button/ui-button';
 import { UISettingsContent } from '../ui/settings/ui-settings-content';
@@ -72,22 +72,39 @@ export const SettingsPage: React.FC = withErrorCatcher('default', () => {
       form.reset(settingsToFormData(nextSettingsMutable), { keepDefaultValues: false });
   });
 
-  const { left, right } = switchUtil(subMenu, {
+  const { title, description, content } = switchUtil(subMenu, {
     main: () => ({
-      left: <SettingsMainLeft />,
-      right: <SettingsMainRight />,
+      title: t('settings.sub.main'),
+      description: undefined,
+      content: <>
+        <SettingsMainLeft />
+        <SettingsMainRight />
+        <SettingsMainSystem />
+      </>,
     }),
     "external-pkms": () => ({
-      left: <SettingsExternalLeft />,
-      right: <SettingsExternalRight />,
+      title: t('settings.sub.external'),
+      description: t('settings.external.1.description'),
+      content: <>
+        <SettingsExternalLeft />
+        <SettingsExternalRight />
+      </>,
     }),
     backups: () => ({
-      left: <SettingsBackupLeft />,
-      right: <SettingsBackupRight />,
+      title: t('settings.sub.backups'),
+      description: undefined,
+      content: <>
+        <SettingsBackupRight />
+        <SettingsBackupLeft />
+      </>,
     }),
     about: () => ({
-      left: <SettingsAboutLeft />,
-      right: <SettingsAboutRight />,
+      title: t('settings.sub.about'),
+      description: t('settings.about.1.description'),
+      content: <>
+        <SettingsAboutLeft />
+        <SettingsAboutRight />
+      </>,
     }),
   })();
 
@@ -95,36 +112,32 @@ export const SettingsPage: React.FC = withErrorCatcher('default', () => {
     <UISettingsContent
       key={subMenu}
       onSubmit={submit}
-      left={left}
-      right={right}
-      bottom={subMenu !== 'about' && <Center>
-        <Card>
-          <Stack align='center'>
-            <Group wrap='nowrap'>
-              <UIButton
-                name='cancel'
-                controlLabel={t('action.cancel')}
-                onClick={() => form.reset(defaultValue)}
-                disabled={!form.formState.isDirty}
-              >
-                {t('action.cancel')}
-              </UIButton>
+      title={title}
+      description={description}
+      bottom={subMenu !== 'about' && <>
+        <UIButton
+          name='cancel'
+          controlLabel={t('action.cancel')}
+          onClick={() => form.reset(defaultValue)}
+          disabled={!form.formState.isDirty}
+        >
+          {t('action.cancel')}
+        </UIButton>
 
-              <UIButton
-                name='submit'
-                controlLabel={t('action.submit')}
-                type='submit'
-                variant='filled'
-                leftSection={<SaveIcon />}
-                loading={settingsMutation.isPending}
-                disabled={settings?.demoMode || !form.formState.isDirty}
-              >
-                {t('action.submit')}
-              </UIButton>
-            </Group>
-          </Stack>
-        </Card>
-      </Center>}
-    />
+        <UIButton
+          name='submit'
+          controlLabel={t('action.submit')}
+          type='submit'
+          variant='filled'
+          leftSection={<SaveIcon />}
+          loading={settingsMutation.isPending}
+          disabled={settings?.demoMode || !form.formState.isDirty}
+        >
+          {t('action.submit')}
+        </UIButton>
+      </>}
+    >
+      {content}
+    </UISettingsContent>
   </FormProvider>;
 });

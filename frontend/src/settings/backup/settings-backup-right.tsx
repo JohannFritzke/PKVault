@@ -1,16 +1,19 @@
-import { EmptyState, Tabs, useMatches } from '@mantine/core';
-import { PackageOpenIcon } from 'lucide-react';
+import { EmptyState, Tabs, Tooltip, useMatches } from '@mantine/core';
+import { DatabaseZapIcon, PackageOpenIcon } from 'lucide-react';
 import React from "react";
-import { useBackupDelete, useBackupGetAll, useBackupRestore } from '../../data/sdk/backup/backup.gen';
+import { useBackupCreate, useBackupDelete, useBackupGetAll, useBackupRestore } from '../../data/sdk/backup/backup.gen';
+import type { BackupDTO } from '../../data/sdk/model';
 import { useSettingsGet } from '../../data/sdk/settings/settings.gen';
 import { useTranslate } from '../../translate/i18n';
+import { UIButton } from '../../ui/form/button/ui-button';
 import { PathUtil } from '../../ui/form/globs-input/util/path-util';
+import { UIPathLine } from '../../ui/path/ui-path-line';
 import { UIBackupItem } from '../../ui/settings/backups/ui-backup-item';
 import { UIBackupList } from '../../ui/settings/backups/ui-backup-list';
 import { UIBackupsTabList } from '../../ui/settings/backups/ui-backups-tab-list';
+import classes from '../../ui/settings/ui-settings.module.css';
 import { renderDate, renderTime } from '../../util/render-date-time';
 import { BackupLineForm } from './backup-line-form';
-import type { BackupDTO } from '../../data/sdk/model';
 
 export const SettingsBackupRight: React.FC = () => {
     const { t } = useTranslate();
@@ -20,6 +23,7 @@ export const SettingsBackupRight: React.FC = () => {
 
     const backupQuery = useBackupGetAll();
 
+    const backupCreateMutation = useBackupCreate();
     const backupRestoreMutation = useBackupRestore();
     const backupDeleteMutation = useBackupDelete();
 
@@ -49,28 +53,46 @@ export const SettingsBackupRight: React.FC = () => {
     });
 
     return <UIBackupList
-        header={<UIBackupsTabList
+        title={t('settings.backups.1.label')}
+        description={<UIPathLine className={classes.mono}>{settings?.settingsMutable.backuP_PATH ?? '-'}</UIPathLine>}
+        actions={<Tooltip
+            label={t('action.not-possible')}
+            disabled={settings?.canCreateBackup}
+        >
+            <UIButton
+                name='create-backup'
+                controlLabel={t('action.select')}
+                onClick={() => backupCreateMutation.mutateAsync()}
+                disabled={!settings?.canCreateBackup}
+                loading={backupCreateMutation.isPending}
+                variant='filled'
+                leftSection={<DatabaseZapIcon />}
+            >
+                {t('settings.backups.create')}
+            </UIButton>
+        </Tooltip>}
+        tabs={<UIBackupsTabList
             value={selectedDay ?? ''}
             onSelect={setSelectedDay}
             scopeId='settings-content'
         >
-            {days.length === 0 && <Tabs.Tab value='-' p='md' style={{
+            {days.length === 0 && <Tabs.Tab value='-' py='sm' style={{
                 opacity: 0,
                 pointerEvents: 'none',
             }}>
             </Tabs.Tab>}
 
-            {days.map(day => <Tabs.Tab key={day} value={day} p='md'>
+            {days.map(day => <Tabs.Tab key={day} value={day} py='sm' px='md'>
                 {day}
             </Tabs.Tab>)}
         </UIBackupsTabList>}
-    >
-        {sortedBackups.length === 0 && <EmptyState
+        empty={sortedBackups.length === 0 && <EmptyState
             size='sm'
+            py='xl'
             icon={<PackageOpenIcon />}
             title={t('settings.form.saves.empty')}
         />}
-
+    >
         {sortedBackups
             .filter(bkp => bkp.createdAtDateStr === selectedDay)
             .map(({ backup }, i) => <UIBackupItem

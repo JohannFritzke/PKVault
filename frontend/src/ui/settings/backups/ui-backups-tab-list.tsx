@@ -22,7 +22,7 @@ export const UIBackupsTabList: React.FC<UIBackupsTabListProps> = ({ value, onSel
         onChange={tab => tab && onSelect(tab)}
     >
         <Tabs.List
-            pl='md'
+            pl='lg'
             style={{
                 flexGrow: 1,
                 alignItems: 'center',

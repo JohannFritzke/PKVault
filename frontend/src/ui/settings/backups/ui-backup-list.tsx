@@ -1,24 +1,32 @@
-import { Card, Table } from '@mantine/core';
+import { Table } from '@mantine/core';
 import type React from 'react';
-import { getScrollPadding } from '../../scrollbar-width/util/get-scroll-padding';
+import { UISettingsSection } from '../section/ui-settings-section';
 
 type UIBackupListProps = {
-    header: React.ReactNode;
+    title: React.ReactNode;
+    description?: React.ReactNode;
+    actions?: React.ReactNode;
+    tabs: React.ReactNode;
+    empty?: React.ReactNode;
     children: React.ReactNode;
 };
 
-export const UIBackupList: React.FC<UIBackupListProps> = ({ header, children }) => {
-    return <Card mah='100%' style={{ overflow: 'auto' }}>
-        <Card.Section>
-            {header}
-        </Card.Section>
+export const UIBackupList: React.FC<UIBackupListProps> = ({ title, description, actions, tabs, empty, children }) => {
+    return <UISettingsSection
+        title={title}
+        description={description}
+        actions={actions}
+    >
+        {tabs}
 
-        <Card.Section withBorder inheritPadding py='md' pr={getScrollPadding('md')} style={{ overflow: 'auto', scrollbarGutter: 'stable' }}>
-            <Table horizontalSpacing='md'>
+        {empty}
+
+        <div style={{ overflowX: 'auto' }}>
+            <Table horizontalSpacing='lg' verticalSpacing='sm' fz='sm'>
                 <Table.Tbody>
                     {children}
                 </Table.Tbody>
             </Table>
-        </Card.Section>
-    </Card>;
+        </div>
+    </UISettingsSection>;
 };
