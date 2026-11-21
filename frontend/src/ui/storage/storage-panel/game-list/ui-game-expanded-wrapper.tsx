@@ -141,18 +141,21 @@ export const UIGameExpandedWrapper: React.FC<UIGameExpandedWrapperProps> = ({
                         {tertiaryLine}
                     </Group>}
 
-                    {fourthLine && <Group
+                    {/* always keep this row so every card (PKVault included) has the same height */}
+                    <Group
                         component={Text}
                         gap='sm'
                         wrap='nowrap'
                         mx='auto'
+                        aria-hidden={!fourthLine || undefined}
                         style={{
                             textWrap: 'nowrap',
                             textOverflow: 'ellipsis',
+                            visibility: fourthLine ? undefined : 'hidden',
                         }}
                     >
-                        {fourthLine}
-                    </Group>}
+                        {fourthLine || ' '}
+                    </Group>
 
                     {missingFile && <Group
                         component={Text}
