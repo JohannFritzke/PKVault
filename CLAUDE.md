@@ -9,7 +9,7 @@ Leia este arquivo inteiro antes de mudar qualquer coisa.
 
 1. **Não trocar a stack.** Frontend: React 19 + Mantine 9 + CSS Modules. Backend: .NET 10.
    - Proibido adicionar Tailwind, Radix, shadcn/ui ou outra biblioteca de componentes.
-   - O visual "estilo shadcn" é só **linguagem visual**: paleta neutra, bordas de 1px, raio ~8px, espaçamento generoso. Tudo isso é feito com tema e CSS do Mantine.
+   - O visual "estilo shadcn" é só **linguagem visual**: paleta neutra, bordas de 1px, raio 4px (cards 6px, como o `rounded-sm` do Tailwind), espaçamento generoso. Tudo isso é feito com tema e CSS do Mantine.
 2. **O frontend é fork definitivo.** Não tentamos manter o frontend mergeável com o upstream.
 3. **O backend deve continuar mergeável.** Trazemos correções do Core e atualizações do PKHeX do upstream. Por isso:
    - Código novo vai em **pastas novas** dentro de `PKVault.Core/` (ex.: `save-discovery/`, `cloud/`).
