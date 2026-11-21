@@ -86,7 +86,7 @@ cd frontend && npm run c:type && npm run c:lint && npx vitest run && npm run c:t
 
 Baseline em 2026-11-20 (upstream `17fe85b1`, v2.5.3): 164 testes no backend e 60 no frontend, tudo verde. Uma tarefa não pode deixar isso pior.
 
-O `npm run c:lint:css` tem **8 erros pré-existentes do upstream**, todos em `ui/form/button/ui-button.module.css` (media queries com `em()`, `!important`). O upstream tinha 11; os 3 do header sumiram quando ele foi reescrito. Não podem aparecer erros novos. Se você reescrever um desses arquivos, corrija os erros dele.
+O `npm run c:lint:css` está **zerado** desde 2026-11-21 (os 8 erros herdados do upstream em `ui-button.module.css` foram corrigidos). Não podem aparecer erros novos.
 
 Mudanças visuais também passam pelo roteiro em [docs/fork/visual-qa.md](docs/fork/visual-qa.md).
 
@@ -105,7 +105,10 @@ Mudanças visuais também passam pelo roteiro em [docs/fork/visual-qa.md](docs/f
 - Fonte: **Arial** no lugar da pixelada "Pixel Operator" (`base-theme.ts`, `fontFamily`).
 - Identidade visual **neutra, simples e minimalista**:
   - Header, footer e moldura em cinza-zinco, sem fundo colorido.
-  - O terracota (`primary`) fica só em detalhes: aba ativa, seleção, foco e ações principais.
+  - A cor `primary` é **neutra** (estilo shadcn): quase branca no tema escuro, quase preta no claro, com o texto invertido. É um `virtualColor` em `base-theme.ts` (`primaryLight` e `primaryDark`). Vale para ação principal, aba ativa, seleção, filtro ativo e foco.
+  - **Vermelho** (`red`, `#dc2626`) só em ações que pedem cuidado: soltar, deletar, remover, restaurar.
+  - **Azul** (`blue`, `#2563eb`) só em edição. Busca, envio e "Salvar" não são azuis.
+  - Logo: **Ultra Ball** (`frontend/public/logo.svg`, `icon.png`, `icon.ico`). O amarelo dela não é cor de interface.
   - As cores de tipo, jogo e status (`customTheme`) não mudam.
 - Ideia futura, ainda **não implementar**: abrir os detalhes do pokémon (status etc.) num **dialog modal estilo shadcn** em vez do painel lateral atual.
 - Servidor: PocketBase numa VM Oracle Always Free (AMD micro), atrás de um Caddy com HTTPS e domínio DuckDNS. Login só por OAuth (Google e GitHub).
