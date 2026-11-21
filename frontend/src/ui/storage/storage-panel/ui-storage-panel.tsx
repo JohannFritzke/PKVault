@@ -29,7 +29,7 @@ export const UIStoragePanel: React.FC<UIStoragePanelProps> = ({ gameTabs, header
         }}
         {...rest}
     >
-        <Card.Section mah='100%' className={classes.tabsSection}>
+        <Card.Section className={classes.tabsSection}>
             {gameTabs}
         </Card.Section>
 

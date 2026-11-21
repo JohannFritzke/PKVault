@@ -3,8 +3,19 @@
 }
 
 .tabs-section {
+    display: flex;
+    flex-direction: column;
     flex-shrink: 1;
-    overflow-y: auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+/* when the save list is alone in the panel, let it reach the bottom edge
+   (Mantine only does this for the last child it sees, and falsy siblings hide it) */
+.tabs-section:last-child {
+    max-height: calc(100% + var(--card-padding) * 2);
+    margin-bottom: calc(var(--card-padding) * -1);
 }
 
 .header {

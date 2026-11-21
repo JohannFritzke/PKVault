@@ -54,7 +54,7 @@ export const UIStoragePanelGameList: React.FC<UIStoragePanelGameListProps> = ({
                 <Text component={params.selected ? 'b' : undefined} textWrap='nowrap'>{params.item.label}</Text>
             </Tabs.Tab>
         </Tooltip>}
-        renderExpanded={(data, opt) => <Card withBorder={false} bdrs={0}>
+        renderExpanded={(data, opt) => <Card withBorder={false} bdrs={0} className={classes.expanded}>
             <Card.Section withBorder inheritPadding h={33} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -79,12 +79,15 @@ export const UIStoragePanelGameList: React.FC<UIStoragePanelGameListProps> = ({
                 />
             </Card.Section>
 
-            <Card.Section withBorder inheritPadding py='inherit'>
+            {/* only the save list scrolls; upload / find actions stay visible below it */}
+            <Card.Section withBorder inheritPadding py='inherit' className={classes.list}>
                 <Group align='flex-start'>
                     {renderExpanded?.(data, opt)}
-
-                    {createActions}
                 </Group>
+            </Card.Section>
+
+            <Card.Section withBorder inheritPadding className={classes.actions}>
+                {createActions}
             </Card.Section>
         </Card>}
     />;
