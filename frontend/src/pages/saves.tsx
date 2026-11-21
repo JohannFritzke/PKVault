@@ -1,5 +1,5 @@
 import { ActionIcon, EmptyState, Tooltip } from '@mantine/core';
-import { DownloadIcon, FolderIcon, FolderSearchIcon, PackageOpenIcon, TrashIcon, TriangleAlertIcon } from 'lucide-react';
+import { DownloadIcon, FolderIcon, FolderSearchIcon, PackageOpenIcon, ScanSearchIcon, TrashIcon, TriangleAlertIcon } from 'lucide-react';
 import type React from "react";
 import { HistoryContext } from '../context/history-context';
 import { getApiFullUrl } from '../data/mutator/custom-instance';
@@ -55,6 +55,18 @@ export const SavesPage: React.FC = withErrorCatcher('default', () => {
         title={t('header.saves')}
         description={t('saves.subtitle')}
         actions={<>
+          <UIButton
+            name='discover-saves'
+            controlLabel={t('discovery.action.open')}
+            onClick={() => navigate({
+              to: '/saves/discovery'
+            })}
+            leftSection={<ScanSearchIcon />}
+            variant='default'
+          >
+            {t('discovery.action.open')}
+          </UIButton>
+
           <UIButton
             name='add-game-path'
             controlLabel={addPathLabel}

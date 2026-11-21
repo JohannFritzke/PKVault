@@ -38,7 +38,7 @@ export const Header: React.FC = () => {
             <UIHeaderItem
                 id={'saves' satisfies HeaderValue}
                 to={"/saves"}
-                selected={value === 'saves'}
+                selected={value === 'saves' || value === 'saves/discovery'}
                 label={t('header.saves')}
                 leftSection={<SaveIcon />}
                 noLabelMobileScreen
@@ -128,6 +128,7 @@ export const Header: React.FC = () => {
                 />
             </Group>,
             'saves': () => null,
+            'saves/discovery': () => null,
             'settings': () => <SettingsSubMenu />,
             '': () => null,
         })()}
