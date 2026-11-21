@@ -17,7 +17,7 @@ public class BackupService(
 {
     private static readonly string dateTimeFormat = "yyyy-MM-ddTHHmmss-fffZ";
 
-    public async Task<DateTime> CreateBackup(string name, DataUpdateFlags flags)
+    public async Task<DateTime> CreateBackup(string name, DataUpdateFlags flags, bool writeLocal = true)
     {
         using var _ = Log.Logger.Time("Create backup");
 
@@ -66,16 +66,19 @@ public class BackupService(
             var fileName = GetBackupFilename(startTime, name);
             var bkpZipPath = Path.Combine(bkpPath, fileName);
 
-            var bkpZipContent = memoryStream.ToArray();
-            await fileIOService.WriteBytes(bkpZipPath, bkpZipContent);
-            Log.Information($"Write backup to {bkpZipPath}");
-
-            // fork: extra backup destinations (backup-providers/)
-            BackupProviders.BackupProviderHook.NotifyCreated(sp, bkpZipPath, name, startTime, bkpZipContent);
+            if (writeLocal)
+            {
+                await fileIOService.WriteBytes(bkpZipPath, memoryStream.ToArray());
+                Log.Information($"Write backup to {bkpZipPath}");
+            }
+            else
+                // fork: in-memory snapshot for extra backup destinations (backup-providers/)
+                BackupProviders.BackupProviderHook.NotifyCreated(sp, name, startTime, memoryStream.ToArray());
         }
         steptime.Dispose();
 
-        flags.Backups = true;
+        if (writeLocal)
+            flags.Backups = true;
 
         return startTime;
     }
@@ -445,6 +448,9 @@ public class BackupService(
 
             throw;
         }
+
+        // fork: send the saved state to extra backup destinations (backup-providers/)
+        await BackupProviders.BackupProviderHook.AfterSave(sp, this);
     }
 
     private string GetBackupsPath()

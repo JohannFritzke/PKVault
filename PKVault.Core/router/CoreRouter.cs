@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using NSwag;
 using PKVault.Core.backup.routes;
+using PKVault.Core.cloud.routes;
 using PKVault.Core.dex.routes;
 using PKVault.Core.saveinfos.routes;
 using PKVault.Core.savediscovery.routes;
@@ -36,6 +37,7 @@ public partial class CoreRouter
         typeof(WarningsController),
         typeof(StaticDataController),
         typeof(SaveDiscoveryController),
+        typeof(CloudController),
     ];
 
     // "GET", "api/static-data/spritesheet/{sheetName}", MethodInfo, (ParameterInfo, Kind)[], "StaticData", "GetSpritesheetImg"

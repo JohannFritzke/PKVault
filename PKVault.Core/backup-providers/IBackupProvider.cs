@@ -1,20 +1,23 @@
 namespace PKVault.Core.BackupProviders;
 
 /// <summary>
-/// A backup zip that was just written locally by <see cref="BackupService"/>.
+/// A backup zip made in memory by <see cref="BackupService"/> right after a successful save
+/// (the local "backup_before_save" holds the state before the save, so it is not pushed).
 /// </summary>
 public record BackupArtifact(
-    string FilePath,
     string Name,
     DateTime CreatedAt,
-    string Sha256,
-    long Size
-);
+    byte[] Content,
+    string Sha256
+)
+{
+    public long Size => Content.LongLength;
+}
 
 /// <summary>
 /// An extra destination for backups (cloud server, mirror folder...).
-/// The local backup folder stays the source of truth; providers receive a copy
-/// in the background, so a slow or failing provider never blocks or breaks "Save".
+/// The local backup folder stays the source of truth; providers receive a snapshot of the
+/// saved state in the background, so a slow or failing provider never blocks or breaks "Save".
 /// </summary>
 public interface IBackupProvider
 {

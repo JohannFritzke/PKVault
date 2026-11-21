@@ -51,6 +51,20 @@ public sealed class BackupProviderDispatcher : IAsyncDisposable, IDisposable
 
     public bool HasProviders => providers.Count > 0;
 
+    /// <summary>True when at least one provider is configured (avoids building snapshots for nothing).</summary>
+    public bool AnyEnabled() => providers.Any(provider =>
+    {
+        try
+        {
+            return provider.IsEnabled();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Backup provider {provider.Id}: IsEnabled failed");
+            return false;
+        }
+    });
+
     /// <summary>Adds a backup to the queue. Returns immediately.</summary>
     public void Enqueue(BackupArtifact artifact)
     {
@@ -61,7 +75,7 @@ public sealed class BackupProviderDispatcher : IAsyncDisposable, IDisposable
         if (!queue.Writer.TryWrite(artifact))
         {
             Interlocked.Decrement(ref pendingCount);
-            Log.Warning($"Backup providers queue closed, {artifact.FilePath} not pushed");
+            Log.Warning($"Backup providers queue closed, {artifact.Name} not pushed");
         }
     }
 
@@ -117,7 +131,7 @@ public sealed class BackupProviderDispatcher : IAsyncDisposable, IDisposable
         {
             try
             {
-                using var _ = Log.Logger.Time($"Backup provider {provider.Id}: push {Path.GetFileName(artifact.FilePath)}");
+                using var _ = Log.Logger.Time($"Backup provider {provider.Id}: push {artifact.Name} ({artifact.Size} bytes)");
                 await provider.Push(artifact, cts.Token);
                 SetStatus(provider.Id, BackupProviderPushState.SUCCESS, artifact, null);
                 return;

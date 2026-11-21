@@ -28,8 +28,8 @@ public class BackupProviderDispatcherTests
     private static readonly TimeSpan[] noDelays = [ TimeSpan.Zero, TimeSpan.Zero ];
 
     private static BackupArtifact Artifact(string name = "backup") => new(
-        FilePath: $"bkp/{name}.zip", Name: name, CreatedAt: new DateTime(2026, 11, 21, 12, 0, 0, DateTimeKind.Utc),
-        Sha256: new string('a', 64), Size: 10
+        Name: name, CreatedAt: new DateTime(2026, 11, 21, 12, 0, 0, DateTimeKind.Utc),
+        Content: new byte[ 10 ], Sha256: new string('a', 64)
     );
 
     [Fact]
@@ -116,11 +116,11 @@ public class BackupProviderDispatcherTests
         await using var sp = services.BuildServiceProvider();
 
         byte[] content = [ 1, 2, 3, 4 ];
-        BackupProviderHook.NotifyCreated(sp, "bkp/x.zip", "x", new DateTime(2026, 11, 21, 0, 0, 0, DateTimeKind.Utc), content);
+        BackupProviderHook.NotifyCreated(sp, "x", new DateTime(2026, 11, 21, 0, 0, 0, DateTimeKind.Utc), content);
         await sp.GetRequiredService<BackupProviderDispatcher>().WaitForIdle();
 
         var pushed = Assert.Single(provider.Pushed);
-        Assert.Equal("bkp/x.zip", pushed.FilePath);
+        Assert.Equal("x", pushed.Name);
         Assert.Equal(4, pushed.Size);
         Assert.Equal(Convert.ToHexStringLower(SHA256.HashData(content)), pushed.Sha256);
     }
@@ -130,7 +130,18 @@ public class BackupProviderDispatcherTests
     {
         var sp = new ServiceCollection().BuildServiceProvider();
 
-        BackupProviderHook.NotifyCreated(sp, "bkp/x.zip", "x", DateTime.UtcNow, [ 1 ]);
+        BackupProviderHook.NotifyCreated(sp, "x", DateTime.UtcNow, [ 1 ]);
+    }
+
+    [Fact]
+    public async Task AnyEnabled_ReflectsProviders()
+    {
+        var off = new FakeProvider("off", enabled: false);
+        await using var dispatcher = new BackupProviderDispatcher([ off ], TimeProvider.System, noDelays);
+
+        Assert.False(dispatcher.AnyEnabled());
+        off.Enabled = true;
+        Assert.True(dispatcher.AnyEnabled());
     }
 
     [Fact]
@@ -141,6 +152,8 @@ public class BackupProviderDispatcherTests
         Program.ConfigureServices(services);
         using var sp = services.BuildServiceProvider();
 
-        Assert.NotNull(sp.GetService<BackupProviderDispatcher>());
+        var dispatcher = sp.GetRequiredService<BackupProviderDispatcher>();
+        Assert.Contains(sp.GetServices<IBackupProvider>(), p => p.Id == "pocketbase");
+        Assert.True(dispatcher.HasProviders);
     }
 }

@@ -5,6 +5,7 @@ using PKVault.Core.backup.routes;
 using PKVault.Core.dex.routes;
 using PKVault.Core.saveinfos.routes;
 using PKVault.Core.BackupProviders;
+using PKVault.Core.Cloud;
 using PKVault.Core.SaveDiscovery;
 using PKVault.Core.settings.routes;
 using PKVault.Core.storage.routes;
@@ -144,6 +145,7 @@ public class Program
         services.AddScoped<StaticDataController>();
         services.AddSaveDiscovery();
         services.AddBackupProviders();
+        services.AddCloud();
 
         Log.Information($"Setup services - Finished");
     }

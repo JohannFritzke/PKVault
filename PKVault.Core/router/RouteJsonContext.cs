@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Primitives;
 using PKHeX.Core;
+using PKVault.Core.Cloud;
 using PKVault.Core.SaveDiscovery;
 
 namespace PKVault.Core;
@@ -11,6 +12,9 @@ namespace PKVault.Core;
 [JsonSerializable(typeof(SaveDiscoveryResultDTO))]
 [JsonSerializable(typeof(ScanFolderRequestDTO))]
 [JsonSerializable(typeof(AddDiscoveredSavesRequestDTO))]
+[JsonSerializable(typeof(CloudStatusDTO))]
+[JsonSerializable(typeof(CloudLoginRequestDTO))]
+[JsonSerializable(typeof(CloudLoginStartDTO))]
 [JsonSerializable(typeof(DirectoryContent))]
 [JsonSerializable(typeof(WarningsDTO))]
 [JsonSerializable(typeof(List<BankDTO>))]
