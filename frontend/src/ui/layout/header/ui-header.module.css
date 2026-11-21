@@ -16,7 +16,7 @@
 }
 
 .ui-header .first-line {
-    padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-sm) var(--pk-page-gutter);
     white-space: nowrap;
     overflow-x: auto;
     border-bottom: 1px solid var(--mantine-color-default-border);
@@ -33,13 +33,13 @@
 }
 
 .ui-header .second-line {
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-xs) var(--pk-page-gutter);
     overflow: hidden;
 }
 
 @media only screen and (width <= 64em) {
     .ui-header .first-line {
-        padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+        padding: var(--mantine-spacing-xs) var(--pk-page-gutter);
     }
 
     .ui-header .brand {
@@ -56,6 +56,18 @@
     }
 
     .ui-header .second-line {
-        padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+        padding: var(--mantine-spacing-xs) var(--pk-page-gutter);
     }
+}
+
+/* page tabs (Saves / Storage / Pokédex) grouped in a muted segmented track */
+.ui-header .nav {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: calc(var(--mantine-radius-md) + 2px);
+    background-color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
 }

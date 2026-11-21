@@ -8,19 +8,25 @@
 .inner {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 24px;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: var(--mantine-spacing-xl) 24px;
+    padding-bottom: var(--mantine-spacing-lg);
     box-sizing: border-box;
 }
 
 .header {
     display: flex;
     flex-wrap: wrap;
-    align-items: flex-end;
+    align-items: center;
     gap: var(--mantine-spacing-md);
+    padding-bottom: var(--mantine-spacing-lg);
+    border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.header-description {
+    margin-top: 2px;
+    font-size: 14px;
+    color: var(--mantine-color-dimmed);
 }
 
 .header-title {
@@ -53,6 +59,12 @@
     font-size: 13px;
     font-weight: 400;
     color: var(--mantine-color-dimmed);
+}
+
+.section-rule {
+    flex: 1 1 40px;
+    height: 1px;
+    background-color: var(--mantine-color-default-border);
 }
 
 .cards {

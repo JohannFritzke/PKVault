@@ -8,6 +8,7 @@ import { UIButton, type UIButtonProps } from '../../form/button/ui-button';
 import { WithControlsIcons } from '../../interaction/controls/icons/with-controls-icons';
 import { getSelectControl } from '../../interaction/focus-controls/common-controls/select-controls';
 import { useFocusControls } from '../../interaction/focus-controls/use-focus-controls';
+import classes from './ui-header-item.module.css';
 
 export type UIHeaderItemProps = Pick<UIButtonProps, 'leftSection' | 'noLabelMobileScreen' | 'children'> & {
   id: string;
@@ -65,10 +66,12 @@ export const UIHeaderItem: React.FC<UIHeaderItemProps> = ({
       }}
       name={id}
       controlLabel={label}
-      variant={selected ? 'light' : 'subtle'}
+      variant='subtle'
       color='gray'
       size='compact-sm'
       h={28}
+      className={classes.item}
+      data-active={selected || undefined}
       {...focusProps}
       {...controlProps('open')}
       style={{ pointerEvents: selected ? 'none' : undefined }}
@@ -76,7 +79,7 @@ export const UIHeaderItem: React.FC<UIHeaderItemProps> = ({
       leftSection={leftSection}
       noLabelMobileScreen={noLabelMobileScreen}
     >
-      <Text fw={500} c={selected ? 'bright' : 'dimmed'}>
+      <Text span fw={500} fz='sm' c='inherit'>
         {children}
       </Text>
     </UIButton>

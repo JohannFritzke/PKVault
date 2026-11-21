@@ -200,6 +200,7 @@
   "saves.action.delete": "Delete save file PERMANENTLY",
   "saves.action.download": "Download save file",
   "saves.action.open": "Open save folder",
+  "saves.subtitle": "The save files PKVault is managing. Click a card to open it in Storage.",
   "saves.title": "Generation {{generation}}",
   "saves.title.species": "{{maxSpecies}} species",
   "saves.upload.button": "Upload saves to server",

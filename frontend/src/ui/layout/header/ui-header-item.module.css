@@ -1,0 +1,17 @@
+/* shadcn-like nav item: muted text, quiet hover, raised "pill" when active */
+.item {
+    color: var(--mantine-color-dimmed);
+    border: 1px solid transparent;
+    transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease;
+}
+
+.item:hover {
+    color: var(--mantine-color-bright);
+}
+
+.item[data-active] {
+    color: var(--mantine-color-bright);
+    border-color: var(--mantine-color-default-border);
+    background-color: var(--mantine-color-body);
+    box-shadow: var(--mantine-shadow-xs);
+}

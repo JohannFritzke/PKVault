@@ -45,7 +45,9 @@ export const UIHeader: React.FC<{
                                     {demoMode && <Badge size='sm' variant='light'>DEMO</Badge>}
                                 </Group>
 
-                                {left}
+                                <nav className={classes.nav}>
+                                    {left}
+                                </nav>
 
                                 {gap !== 'xs' && <Box ml='auto' />}
 

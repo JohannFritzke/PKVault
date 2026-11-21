@@ -1,4 +1,5 @@
-import { Button, Divider, Group, Image, Stack, Text } from '@mantine/core';
+import { Button, Divider, Group, Stack, Text } from '@mantine/core';
+import { UIGameIcon } from '../../../game-icon/ui-game-icon';
 import { clsx } from 'clsx';
 import { CopyIcon, FileXIcon, PenIcon } from 'lucide-react';
 import React from 'react';
@@ -80,11 +81,7 @@ export const UIGameExpandedWrapper: React.FC<UIGameExpandedWrapperProps> = ({
     return <Group w={gameExpandedConstants.width} gap='xs' align='flex-start' wrap='nowrap'>
 
         <Stack gap='xs'>
-            <Image
-                src={imgSrc}
-                className={classes.icon}
-                radius='md'
-            />
+            <UIGameIcon src={imgSrc} />
 
             {!loading && <>
 

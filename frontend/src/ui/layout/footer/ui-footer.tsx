@@ -12,7 +12,7 @@ export const UIFooter: React.FC = () => {
 
     return <Group
         className={classes.uiFooter}
-        px='md'
+        px='var(--pk-page-gutter)'
         py='xs'
         gap='lg'
         wrap='nowrap'

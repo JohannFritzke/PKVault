@@ -200,6 +200,7 @@
   "saves.action.delete": "Speicherstand dauerhaft löschen",
   "saves.action.download": "Speicherdatei herunterladen",
   "saves.action.open": "Ordner mit Speicherständen öffnen",
+  "saves.subtitle": "Die Spielstände, die PKVault verwaltet. Klicke auf eine Karte, um sie im Speicher zu öffnen.",
   "saves.title": "Generation {{generation}}",
   "saves.title.species": "{{maxSpecies}} Arten",
   "saves.upload.button": "Spielstände auf Server hochladen",

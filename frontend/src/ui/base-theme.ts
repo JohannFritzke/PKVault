@@ -205,12 +205,13 @@ export const baseTheme = {
     lg: rem(16),
     xl: rem(32)
   },
+  // tight corners, like tailwind `rounded-sm` (4px): default (md) = 4px, cards (lg) = 6px
   radius: {
-    xs: rem(4),
-    sm: rem(6),
-    md: rem(8),
-    lg: rem(12),
-    xl: rem(16),
+    xs: rem(2),
+    sm: rem(4),
+    md: rem(4),
+    lg: rem(6),
+    xl: rem(8),
   },
   breakpoints: {
     xs: '36rem', // rem(576),

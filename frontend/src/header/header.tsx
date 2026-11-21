@@ -1,6 +1,6 @@
 import { Group, Tooltip } from '@mantine/core';
 import { useMatches } from '@tanstack/react-router';
-import { InfoIcon, RefreshCwIcon } from 'lucide-react';
+import { ArchiveIcon, BookOpenIcon, InfoIcon, RefreshCwIcon, SaveIcon } from 'lucide-react';
 import type React from 'react';
 import { useSaveInfosScan } from '../data/sdk/save-infos/save-infos.gen';
 import { useSettingsGet } from '../data/sdk/settings/settings.gen';
@@ -40,6 +40,8 @@ export const Header: React.FC = () => {
                 to={"/saves"}
                 selected={value === 'saves'}
                 label={t('header.saves')}
+                leftSection={<SaveIcon />}
+                noLabelMobileScreen
             >
                 {t('header.saves')}
             </UIHeaderItem>
@@ -49,6 +51,8 @@ export const Header: React.FC = () => {
                 to={"/storage"}
                 selected={value === 'storage'}
                 label={t('header.storage')}
+                leftSection={<ArchiveIcon />}
+                noLabelMobileScreen
             >
                 {t('header.storage')}
             </UIHeaderItem>
@@ -58,10 +62,13 @@ export const Header: React.FC = () => {
                 to={"/pokedex"}
                 selected={value === 'pokedex'}
                 label={t('header.dex')}
+                leftSection={<BookOpenIcon />}
+                noLabelMobileScreen
             >
                 {t('header.dex')}
             </UIHeaderItem>
-
+        </>}
+        right={<>
             <Tooltip
                 multiline
                 label={[
@@ -77,19 +84,14 @@ export const Header: React.FC = () => {
                     disabled={!settings?.canScanSaves}
                     noLabelTabletScreen
                     leftSection={<RefreshCwIcon />}
-                    size='compact-xs'
-                    fz='sm'
-                    fw='normal'
+                    size='compact-sm'
                     variant='default'
-                    mx='auto'
                     style={{ alignSelf: 'center' }}
                 >
                     {t('header.reload')}
                 </UIButton>
             </Tooltip>
 
-        </>}
-        right={<>
             <UIHeaderItem
                 id='help'
                 search={{ help: 'README.md' satisfies DocsGenEnSlugs }}

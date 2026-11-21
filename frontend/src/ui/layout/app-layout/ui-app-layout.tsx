@@ -30,7 +30,7 @@ export const UIAppLayout: React.FC<UIAppLayoutProps> = ({ header, bottom, footer
             <UISpriteSizeWrapper<typeof Container>
                 component={Container}
                 speciesSize='md'
-                fluid style={{ overflow: 'hidden', flexGrow: 1 }} w='100%' p='md'>
+                fluid style={{ overflow: 'hidden', flexGrow: 1, padding: 'var(--mantine-spacing-md) var(--pk-page-gutter)' }} w='100%'>
                 <Stack h='100%'>
                     {children}
 

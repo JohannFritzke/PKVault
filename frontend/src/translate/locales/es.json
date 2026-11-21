@@ -200,6 +200,7 @@
   "saves.action.delete": "Eliminar el archivo de partida PERMANENTEMENTE",
   "saves.action.download": "Descargar el archivo de partida",
   "saves.action.open": "Abrir la carpeta de la partida",
+  "saves.subtitle": "Los archivos de guardado que gestiona PKVault. Haz clic en una tarjeta para abrirla en el Almacenamiento.",
   "saves.title": "Generación {{generation}}",
   "saves.title.species": "{{maxSpecies}} especies",
   "saves.upload.button": "Subir partidas al servidor",

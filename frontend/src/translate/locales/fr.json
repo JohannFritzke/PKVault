@@ -200,6 +200,7 @@
   "saves.action.delete": "Supprimer la sauvegarde DÉFINITIVEMENT",
   "saves.action.download": "Télécharger le fichier de sauvegarde",
   "saves.action.open": "Ouvrir le dossier de sauvegarde",
+  "saves.subtitle": "Les sauvegardes gérées par PKVault. Cliquez sur une carte pour l'ouvrir dans le Stockage.",
   "saves.title": "Génération {{generation}}",
   "saves.title.species": "{{maxSpecies}} espèces",
   "saves.upload.button": "Upload de sauvegardes vers le serveur",

@@ -25,11 +25,6 @@
     gap: var(--mantine-spacing-md);
 }
 
-.icon {
-    flex-shrink: 0;
-    width: 44px;
-}
-
 .identity {
     flex: 1 1 auto;
     min-width: 0;

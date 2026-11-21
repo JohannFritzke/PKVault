@@ -1,8 +1,9 @@
-import { Badge, Button, Group, Image } from '@mantine/core';
+import { Badge, Button, Group } from '@mantine/core';
 import { ArrowRightIcon, CopyIcon, PenIcon, TimerIcon } from 'lucide-react';
 import type React from 'react';
 import type { Gender } from '../../../data/sdk/model';
 import { useTranslate } from '../../../translate/i18n';
+import { UIGameIcon } from '../../game-icon/ui-game-icon';
 import { useClickLoading } from '../../form/button/hooks/use-click-loading';
 import { UIGender } from '../../icon/ui-gender';
 import { WithControlsIcons } from '../../interaction/controls/icons/with-controls-icons';
@@ -92,11 +93,7 @@ export const UISaveCard: React.FC<UISaveCardProps> = ({
         })}
     >
         <div className={classes.top}>
-            <Image
-                src={imgSrc}
-                className={classes.icon}
-                radius='md'
-            />
+            <UIGameIcon src={imgSrc} />
 
             <div className={classes.identity}>
                 <div className={classes.name} title={title}>

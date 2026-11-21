@@ -200,6 +200,7 @@
   "saves.action.delete": "永久刪除存檔檔案",
   "saves.action.download": "下載存檔檔案",
   "saves.action.open": "開啟存檔資料夾",
+  "saves.subtitle": "PKVault 管理的存檔檔案。點擊卡片即可在儲存空間中開啟。",
   "saves.title": "第 {{generation}} 世代",
   "saves.title.species": "{{maxSpecies}} 種寶可夢",
   "saves.upload.button": "上傳存檔到伺服器",

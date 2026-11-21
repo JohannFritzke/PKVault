@@ -200,6 +200,7 @@
   "saves.action.delete": "Elimina il file di salvataggio DEFINITIVAMENTE",
   "saves.action.download": "Scarica il file di salvataggio",
   "saves.action.open": "Apri la cartella dei salvataggi",
+  "saves.subtitle": "I salvataggi gestiti da PKVault. Clicca su una scheda per aprirla nell'Archivio.",
   "saves.title": "Generazione {{generation}}",
   "saves.title.species": "{{maxSpecies}} specie",
   "saves.upload.button": "Carica i salvataggi sul server",

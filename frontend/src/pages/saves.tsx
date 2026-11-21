@@ -53,6 +53,7 @@ export const SavesPage: React.FC = withErrorCatcher('default', () => {
     <UISavesScroll>
       <UISavesHeader
         title={t('header.saves')}
+        description={t('saves.subtitle')}
         actions={<>
           <UIButton
             name='add-game-path'

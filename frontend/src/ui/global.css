@@ -6,6 +6,12 @@
   scrollbar-width: thin;
 }
 
+@media only screen and (width <= 48em) {
+  :root {
+    --pk-page-gutter: 12px;
+  }
+}
+
 html {
   overflow: hidden;
 }
@@ -39,6 +45,9 @@ svg.lucide {
   --focus-width: 4px;
   --focus-color-1: var(--mantine-color-primary-6);
   --focus-color-2: var(--mantine-color-primary-3);
+
+  /* page breathing room (content, header and footer share it) */
+  --pk-page-gutter: 24px;
 }
 
 [data-focus-key] {

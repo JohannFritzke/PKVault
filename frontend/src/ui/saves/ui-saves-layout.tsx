@@ -10,10 +10,11 @@ export const UISavesScroll: React.FC<{ children: React.ReactNode }> = ({ childre
     </div>;
 };
 
-export const UISavesHeader: React.FC<{ title: React.ReactNode; actions?: React.ReactNode }> = ({ title, actions }) => {
+export const UISavesHeader: React.FC<{ title: React.ReactNode; description?: React.ReactNode; actions?: React.ReactNode }> = ({ title, description, actions }) => {
     return <div className={classes.header}>
         <div className={classes.headerTitle}>
-            <Title order={1} fz={26} lh='32px' fw={600}>{title}</Title>
+            <Title order={1} fz={24} lh='30px' fw={600}>{title}</Title>
+            {description && <div className={classes.headerDescription}>{description}</div>}
         </div>
 
         {actions && <div className={classes.headerActions}>
@@ -33,8 +34,9 @@ export const UISavesSection: React.FC<UISavesSectionProps> = ({ title, regions, 
     return <section className={classes.section}>
         <div className={classes.sectionTitle}>
             <span>{title}</span>
-            {regions.map(region => <Badge key={region} variant='outline' color='gray' size='sm' radius='xl'>{region}</Badge>)}
+            {regions.map(region => <Badge key={region} variant='default' size='sm'>{region}</Badge>)}
             <span className={classes.sectionCount}>{count}</span>
+            <span className={classes.sectionRule} />
         </div>
 
         <div className={classes.cards}>
