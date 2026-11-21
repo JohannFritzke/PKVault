@@ -71,17 +71,11 @@ export const SettingsBackupRight: React.FC = () => {
                 {t('settings.backups.create')}
             </UIButton>
         </Tooltip>}
-        tabs={<UIBackupsTabList
+        tabs={days.length > 0 && <UIBackupsTabList
             value={selectedDay ?? ''}
             onSelect={setSelectedDay}
             scopeId='settings-content'
         >
-            {days.length === 0 && <Tabs.Tab value='-' py='sm' style={{
-                opacity: 0,
-                pointerEvents: 'none',
-            }}>
-            </Tabs.Tab>}
-
             {days.map(day => <Tabs.Tab key={day} value={day} py='sm' px='md'>
                 {day}
             </Tabs.Tab>)}

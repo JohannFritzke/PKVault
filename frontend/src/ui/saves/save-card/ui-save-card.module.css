@@ -77,11 +77,9 @@
     display: flex;
     align-items: center;
     gap: var(--mantine-spacing-xs);
-    overflow: hidden;
     font-size: 12px;
     color: var(--mantine-color-dimmed);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 16px;
 }
 
 .path {
