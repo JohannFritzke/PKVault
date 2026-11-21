@@ -33,6 +33,10 @@ export const SettingsSubMenu: React.FC = () => {
                 label: t('settings.sub.backups'),
             },
             {
+                id: 'cloud' satisfies typeof currentValue,
+                label: t('settings.sub.cloud'),
+            },
+            {
                 id: 'about' satisfies typeof currentValue,
                 label: t('settings.sub.about'),
             },

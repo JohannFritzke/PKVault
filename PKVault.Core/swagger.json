@@ -153,6 +153,78 @@
         }
       }
     },
+    "/api/cloud/login": {
+      "post": {
+        "tags": [
+          "Cloud"
+        ],
+        "operationId": "Cloud_Login",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CloudLoginRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudLoginStartDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cloud/logout": {
+      "post": {
+        "tags": [
+          "Cloud"
+        ],
+        "operationId": "Cloud_Logout",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudStatusDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/cloud/status": {
+      "get": {
+        "tags": [
+          "Cloud"
+        ],
+        "operationId": "Cloud_Status",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudStatusDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/dex": {
       "get": {
         "tags": [
@@ -4344,6 +4416,126 @@
         ],
         "enum": [
           1
+        ]
+      },
+      "CloudLoginRequestDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string"
+          }
+        }
+      },
+      "CloudLoginStartDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authUrl",
+          "browserOpened"
+        ],
+        "properties": {
+          "authUrl": {
+            "type": "string"
+          },
+          "browserOpened": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CloudStatusDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "serverUrl",
+          "loggedIn",
+          "loginState"
+        ],
+        "properties": {
+          "serverUrl": {
+            "type": "string"
+          },
+          "loggedIn": {
+            "type": "boolean"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userEmail": {
+            "type": "string"
+          },
+          "loginState": {
+            "$ref": "#/components/schemas/CloudLoginState"
+          },
+          "loginProvider": {
+            "type": "string"
+          },
+          "loginError": {
+            "$ref": "#/components/schemas/CloudLoginError"
+          },
+          "loginErrorDetail": {
+            "type": "string"
+          },
+          "backupState": {
+            "$ref": "#/components/schemas/BackupProviderPushState"
+          },
+          "lastBackupAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "backupError": {
+            "type": "string"
+          }
+        }
+      },
+      "CloudLoginState": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "IDLE",
+          "WAITING_BROWSER",
+          "ERROR"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      },
+      "CloudLoginError": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "TIMEOUT",
+          "DENIED",
+          "SERVER",
+          "EXPIRED"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "BackupProviderPushState": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "PENDING",
+          "SUCCESS",
+          "FAILED"
+        ],
+        "enum": [
+          0,
+          1,
+          2
         ]
       },
       "StaticEvolvesRichData": {

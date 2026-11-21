@@ -9,6 +9,8 @@ import { SettingsAboutLeft } from '../settings/about/settings-about-left';
 import { SettingsAboutRight } from '../settings/about/settings-about-right';
 import { SettingsBackupLeft } from '../settings/backup/settings-backup-left';
 import { SettingsBackupRight } from '../settings/backup/settings-backup-right';
+import { SettingsCloudAccount } from '../settings/cloud/settings-cloud-account';
+import { SettingsCloudInfo } from '../settings/cloud/settings-cloud-info';
 import { SettingsExternalLeft } from '../settings/external/settings-external-left';
 import { SettingsExternalRight } from '../settings/external/settings-external-right';
 import { SettingsMainLeft } from '../settings/main/settings-main-left';
@@ -98,6 +100,14 @@ export const SettingsPage: React.FC = withErrorCatcher('default', () => {
         <SettingsBackupLeft />
       </>,
     }),
+    cloud: () => ({
+      title: t('settings.sub.cloud'),
+      description: t('cloud.description'),
+      content: <>
+        <SettingsCloudAccount />
+        <SettingsCloudInfo />
+      </>,
+    }),
     about: () => ({
       title: t('settings.sub.about'),
       description: t('settings.about.1.description'),
@@ -114,7 +124,7 @@ export const SettingsPage: React.FC = withErrorCatcher('default', () => {
       onSubmit={submit}
       title={title}
       description={description}
-      bottom={subMenu !== 'about' && <>
+      bottom={subMenu !== 'about' && subMenu !== 'cloud' && <>
         <UIButton
           name='cancel'
           controlLabel={t('action.cancel')}
