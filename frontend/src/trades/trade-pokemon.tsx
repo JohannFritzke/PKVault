@@ -9,14 +9,15 @@ import { getFormatContext } from './trade-util';
 type TradePokemonProps = {
     pokemon?: TradePokemonSummaryDTO;
     emptyLabel: string;
+    emptyAction?: React.ReactNode;
 };
 
-export const TradePokemon: React.FC<TradePokemonProps> = ({ pokemon, emptyLabel }) => {
+export const TradePokemon: React.FC<TradePokemonProps> = ({ pokemon, emptyLabel, emptyAction }) => {
     const { t } = useTranslate();
     const staticData = useStaticData();
 
     if (!pokemon) {
-        return <UITradePokemon emptyLabel={emptyLabel} />;
+        return <UITradePokemon emptyLabel={emptyLabel} emptyAction={emptyAction} />;
     }
 
     const context = getFormatContext(pokemon.format);

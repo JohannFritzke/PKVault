@@ -1,10 +1,10 @@
-import { Alert, Text, Tooltip } from '@mantine/core';
+import { Alert, Group, Text, Tooltip } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeftRightIcon, SendIcon, TriangleAlertIcon } from 'lucide-react';
+import { ArrowLeftRightIcon, GiftIcon, TriangleAlertIcon } from 'lucide-react';
 import React from 'react';
 import { usePkmIndex } from '../../../data/hooks/use-pkm-index';
-import { TradeStatus, type PkmVariantDTO, type TradeActionResultDTO } from '../../../data/sdk/model';
-import { useTradeCounter, useTradeOffer, useTradeStatus } from '../../../data/sdk/trade/trade.gen';
+import { type PkmVariantDTO, type TradeActionResultDTO } from '../../../data/sdk/model';
+import { useTradeOffer, useTradeStatus } from '../../../data/sdk/trade/trade.gen';
 import { tradeErrorKeys } from '../../../trades/trade-util';
 import { useTranslate } from '../../../translate/i18n';
 import { UIButton } from '../../../ui/form/button/ui-button';
@@ -18,8 +18,8 @@ import { useSelectCallback } from '../../../util/use-select-callback';
 import type { ActionButtonDefaultProps } from './edit-pkm-button';
 
 /**
- * Offers a storage pokémon to a friend, or answers a received offer with it (counter-offer).
- * Only for one storage pokémon, not attached to a save.
+ * Offers a storage pokémon to a friend, as a trade (the friend answers with a pokémon) or as a gift.
+ * Only for one storage pokémon, not attached to a save. Answering a received trade is done from the Trades page.
  */
 export const OfferTradeButton: React.FC<ActionButtonDefaultProps> = ({ pkmIds, saveId }) => {
     const { t } = useTranslate();
@@ -68,39 +68,25 @@ const OfferTradeForm: React.FC<{ pkmVariantId: string }> = ({ pkmVariantId }) =>
 
     const status = useTradeStatus().data?.data;
     const offerMutation = useTradeOffer();
-    const counterMutation = useTradeCounter();
 
-    const answerable = (status?.trades ?? []).filter(trade => !trade.isSender && trade.status === TradeStatus.OPEN);
-    const options = [
-        ...(status?.friends ?? []).map(friend => ({
-            value: `user:${friend.id}`,
-            label: t('trades.offer.to-friend', { name: friend.name }),
-        })),
-        ...answerable.map(trade => ({
-            value: `trade:${trade.id}`,
-            label: t('trades.offer.answer', { name: trade.fromName }),
-        })),
-    ];
+    const options = (status?.friends ?? []).map(friend => ({ value: friend.id, label: friend.name }));
 
     const [ target, setTarget ] = React.useState(options[ 0 ]?.value ?? '');
     const [ message, setMessage ] = React.useState('');
     const [ result, setResult ] = React.useState<TradeActionResultDTO>();
-    const [ loading, setLoading ] = React.useState(false);
+    const [ loading, setLoading ] = React.useState<'trade' | 'gift'>();
 
-    const submit = async () => {
-        const [ kind, id ] = target.split(':') as [ string, string ];
-        setLoading(true);
+    const submit = async (gift: boolean) => {
+        setLoading(gift ? 'gift' : 'trade');
         try {
-            const response = kind === 'trade'
-                ? await counterMutation.mutateAsync({ tradeId: id, data: { pkmVariantId, message } })
-                : await offerMutation.mutateAsync({ data: { pkmVariantId, toUserId: id, message } });
+            const response = await offerMutation.mutateAsync({ data: { pkmVariantId, toUserId: target, message, gift } });
             setResult(response.data);
             if (response.data.success) {
                 await queryClient.invalidateQueries();
                 popover?.setOpened(false);
             }
         } finally {
-            setLoading(false);
+            setLoading(undefined);
         }
     };
 
@@ -110,18 +96,30 @@ const OfferTradeForm: React.FC<{ pkmVariantId: string }> = ({ pkmVariantId }) =>
         description={t('trades.offer.custody')}
         miw={340}
         maw={400}
-        footer={<UIButton
-            name='offer-trade-submit'
-            controlLabel={t('trades.offer.submit')}
-            onClick={submit}
-            loading={loading}
-            disabled={!target}
-            variant='filled'
-            w='100%'
-            leftSection={<SendIcon />}
-        >
-            {t('trades.offer.submit')}
-        </UIButton>}
+        footer={<Group grow>
+            <UIButton
+                name='offer-trade-gift'
+                controlLabel={t('trades.offer.gift')}
+                onClick={() => submit(true)}
+                loading={loading === 'gift'}
+                disabled={!target || loading === 'trade'}
+                variant='default'
+                leftSection={<GiftIcon />}
+            >
+                {t('trades.offer.gift')}
+            </UIButton>
+            <UIButton
+                name='offer-trade-submit'
+                controlLabel={t('trades.offer.submit')}
+                onClick={() => submit(false)}
+                loading={loading === 'trade'}
+                disabled={!target || loading === 'gift'}
+                variant='filled'
+                leftSection={<ArrowLeftRightIcon />}
+            >
+                {t('trades.offer.submit')}
+            </UIButton>
+        </Group>}
     >
         {options.length === 0
             ? <Text c='dimmed' fz='sm'>{t('trades.offer.no-friends')}</Text>

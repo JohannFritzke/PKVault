@@ -8,11 +8,13 @@ export type UITradePokemonProps = {
     meta?: React.ReactNode;
     /** Shown instead of a pokémon (nothing offered back yet...). */
     emptyLabel?: React.ReactNode;
+    /** A button in the empty slot (choose a pokémon to offer back). */
+    emptyAction?: React.ReactNode;
 };
 
-export const UITradePokemon: React.FC<UITradePokemonProps> = ({ img, name, meta, emptyLabel }) => {
-    if (emptyLabel !== undefined) {
-        return <div className={classes.pokemon} data-empty='true'>{emptyLabel}</div>;
+export const UITradePokemon: React.FC<UITradePokemonProps> = ({ img, name, meta, emptyLabel, emptyAction }) => {
+    if (emptyLabel !== undefined || emptyAction !== undefined) {
+        return <div className={classes.pokemon} data-empty='true'>{emptyAction ?? emptyLabel}</div>;
     }
 
     return <div className={classes.pokemon}>

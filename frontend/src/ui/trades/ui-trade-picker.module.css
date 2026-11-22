@@ -1,0 +1,28 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--mantine-spacing-xs);
+}
+
+.slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: var(--mantine-radius-sm);
+}
+
+.slot[data-selected="true"] {
+    border-color: var(--mantine-color-primary-6);
+    box-shadow: 0 0 0 1px var(--mantine-color-primary-6);
+}
+
+.selected {
+    display: flex;
+    align-items: center;
+    gap: var(--mantine-spacing-sm);
+    min-height: 40px;
+    font-size: 14px;
+}

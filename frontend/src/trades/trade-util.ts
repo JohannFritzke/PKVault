@@ -28,6 +28,7 @@ export const tradeErrorKeys = {
     [ TradeError.NOT_LOGGED_IN ]: 'trades.error.not-logged-in',
     [ TradeError.PENDING_CHANGES ]: 'trades.error.pending-changes',
     [ TradeError.CANNOT_TRADE ]: 'trades.error.cannot-trade',
+    [ TradeError.DUPLICATE ]: 'trades.error.duplicate',
     [ TradeError.NOT_FOUND ]: 'trades.error.not-found',
     [ TradeError.SERVER ]: 'trades.error.server',
 } as const;

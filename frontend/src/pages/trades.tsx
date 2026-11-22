@@ -1,12 +1,13 @@
 import { Alert, Anchor, Badge, EmptyState, Group, Loader } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import { ArrowLeftRightIcon, CheckIcon, GiftIcon, InfoIcon, PackageOpenIcon, RefreshCwIcon, TriangleAlertIcon, XIcon } from 'lucide-react';
+import { ArrowLeftRightIcon, CheckIcon, GiftIcon, InfoIcon, PackageOpenIcon, PlusIcon, RefreshCwIcon, TriangleAlertIcon, XIcon } from 'lucide-react';
 import React from 'react';
-import { TradeStatus, type TradeActionResultDTO, type TradeDTO } from '../data/sdk/model';
+import { TradeKind, TradeStatus, type TradeActionResultDTO, type TradeDTO } from '../data/sdk/model';
 import { useTradeAccept, useTradeCancel, useTradeDecline, useTradeStatus } from '../data/sdk/trade/trade.gen';
 import { withErrorCatcher } from '../error/with-error-catcher';
 import { TradePokemon } from '../trades/trade-pokemon';
+import { TradePokemonPicker } from '../trades/trade-pokemon-picker';
 import { tradeErrorKeys } from '../trades/trade-util';
 import { useTranslate } from '../translate/i18n';
 import { UIButton } from '../ui/form/button/ui-button';
@@ -47,6 +48,7 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
 
     const [ tab, setTab ] = React.useState<Tab>('received');
     const [ lastResult, setLastResult ] = React.useState<TradeActionResultDTO>();
+    const [ answering, setAnswering ] = React.useState<TradeDTO>();
 
     const statusQuery = useTradeStatus({
         query: { refetchInterval: 15_000 },
@@ -86,6 +88,10 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                 {t('trades.action.decline')}
             </UIButton>
         </UIConfirmPopover>;
+
+        if (!trade.isSender && trade.status === TradeStatus.OPEN && trade.kind === TradeKind.TRADE) {
+            return decline;
+        }
 
         if (!trade.isSender && trade.status === TradeStatus.OPEN) {
             return <>
@@ -139,8 +145,10 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
     const renderHint = (trade: TradeDTO) => {
         if (!isActive(trade))
             return null;
-        if (!trade.isSender && trade.status === TradeStatus.OPEN)
+        if (!trade.isSender && trade.status === TradeStatus.OPEN && trade.kind === TradeKind.TRADE)
             return t('trades.hint.counter');
+        if (!trade.isSender && trade.status === TradeStatus.OPEN)
+            return t('trades.hint.gift', { name: trade.fromName });
         if (!trade.isSender && trade.status === TradeStatus.COUNTERED)
             return t('trades.hint.waiting-sender', { name: trade.fromName });
         if (trade.isSender && trade.status === TradeStatus.OPEN)
@@ -225,7 +233,23 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                     offered={<TradePokemon pokemon={trade.offered} emptyLabel='' />}
                     countered={<TradePokemon
                         pokemon={trade.countered}
-                        emptyLabel={trade.status === TradeStatus.DONE ? t('trades.card.gift') : t('trades.card.nothing-back')}
+                        emptyLabel={trade.kind === TradeKind.GIFT
+                            ? t('trades.card.gift')
+                            : trade.isSender && trade.status === TradeStatus.OPEN
+                                ? t('trades.card.waiting-choice', { name: trade.toName })
+                                : t('trades.card.nothing-back')}
+                        emptyAction={!trade.isSender && trade.status === TradeStatus.OPEN && trade.kind === TradeKind.TRADE
+                            ? <UIButton
+                                name={`trade-answer-${trade.id}`}
+                                controlLabel={t('trades.action.choose')}
+                                variant='default'
+                                size='compact-md'
+                                leftSection={<PlusIcon />}
+                                onClick={() => setAnswering(trade)}
+                            >
+                                {t('trades.action.choose')}
+                            </UIButton>
+                            : undefined}
                     />}
                     messages={[
                         trade.message && `${trade.fromName}: ${trade.message}`,
@@ -237,6 +261,12 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
             </>}
 
             {statusQuery.isPending && <Group justify='center' py='xl'><Loader size='sm' /></Group>}
+
+            {answering && <TradePokemonPicker
+                trade={answering}
+                opened
+                onClose={() => setAnswering(undefined)}
+            />}
         </UISavesScroll>
     </UISavesContent>;
 });
