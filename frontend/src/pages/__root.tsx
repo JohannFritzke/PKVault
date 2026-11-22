@@ -1,5 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
 import React from "react";
+import { CloudSyncWatcher } from '../cloud/cloud-sync-watcher';
 import { HistoryContext } from '../context/history-context';
 import { useStorageGetActions } from '../data/sdk/storage/storage.gen';
 import { Header } from '../header/header';
@@ -51,6 +52,7 @@ export const RootPage: React.FC = () => {
             <HelpDialog />
             <WelcomeDialog />
             <FlatpakMigrateDialog />
+            <CloudSyncWatcher />
           </UIAppLayout>
         </MoveSelectImplProvider>
       </StorageModeProvider>

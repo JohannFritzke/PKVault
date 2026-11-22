@@ -1,8 +1,8 @@
 import { Alert, Anchor, Badge, Group, Loader, Text } from '@mantine/core';
-import { CloudUploadIcon, LogInIcon, LogOutIcon, ServerIcon, UserRoundIcon } from 'lucide-react';
+import { CloudUploadIcon, LogInIcon, LogOutIcon, RefreshCwIcon, ServerIcon, UserRoundIcon } from 'lucide-react';
 import React from 'react';
-import { useCloudLogin, useCloudLogout, useCloudStatus } from '../../data/sdk/cloud/cloud.gen';
-import { BackupProviderPushState, CloudLoginError, CloudLoginState, type CloudStatusDTO } from '../../data/sdk/model';
+import { useCloudLogin, useCloudLogout, useCloudStatus, useCloudSync } from '../../data/sdk/cloud/cloud.gen';
+import { BackupProviderPushState, CloudLoginError, CloudLoginState, CloudSyncError, CloudSyncState, type CloudStatusDTO } from '../../data/sdk/model';
 import { useTranslate } from '../../translate/i18n';
 import { UIButton } from '../../ui/form/button/ui-button';
 import { UISettingsRow } from '../../ui/settings/section/ui-settings-row';
@@ -15,7 +15,9 @@ const providers = [ 'google', 'github' ] as const;
 const providerLabel = (provider?: string) => provider === 'github' ? 'GitHub' : provider === 'google' ? 'Google' : provider ?? '';
 
 const isBusy = (status?: CloudStatusDTO) => status?.loginState === CloudLoginState.WAITING_BROWSER
-    || status?.backupState === BackupProviderPushState.PENDING;
+    || status?.backupState === BackupProviderPushState.PENDING
+    || status?.syncState === CloudSyncState.CHECKING
+    || status?.syncState === CloudSyncState.PULLING;
 
 /**
  * Cloud account: login with Google/GitHub on the PokéHome server, and the state of backup uploads.
@@ -32,6 +34,7 @@ export const SettingsCloudAccount: React.FC = () => {
 
     const loginMutation = useCloudLogin();
     const logoutMutation = useCloudLogout();
+    const syncMutation = useCloudSync();
 
     const [ authUrl, setAuthUrl ] = React.useState<string>();
 
@@ -40,6 +43,11 @@ export const SettingsCloudAccount: React.FC = () => {
         setAuthUrl(result.data.authUrl);
         if (!result.data.browserOpened)
             window.open(result.data.authUrl, '_blank', 'noopener');
+        await statusQuery.refetch();
+    };
+
+    const syncNow = async () => {
+        await syncMutation.mutateAsync();
         await statusQuery.refetch();
     };
 
@@ -81,6 +89,41 @@ export const SettingsCloudAccount: React.FC = () => {
         return t('cloud.backup.none');
     };
 
+    const renderSync = () => {
+        switch (status.syncState) {
+            case CloudSyncState.CHECKING:
+                return <Group gap='xs'><Loader size='xs' />{t('cloud.sync.checking')}</Group>;
+            case CloudSyncState.PULLING:
+                return <Group gap='xs'><Loader size='xs' />{t('cloud.sync.pulling')}</Group>;
+            case CloudSyncState.WAITING_LOCAL_CHANGES:
+                return t('cloud.sync.waiting-local');
+            case CloudSyncState.ERROR:
+                return <>
+                    {{
+                        [ CloudSyncError.SERVER ]: t('cloud.sync.error.server'),
+                        [ CloudSyncError.INVALID_BACKUP ]: t('cloud.sync.error.invalid'),
+                        [ CloudSyncError.UNSUPPORTED_PATHS ]: t('cloud.sync.error.paths'),
+                    }[ status.syncError ?? CloudSyncError.SERVER ]}
+                    {status.syncErrorDetail && <Text size='xs' c='dimmed' className={classes.mono}>{status.syncErrorDetail}</Text>}
+                </>;
+        }
+
+        const lines: string[] = [];
+        if (status.lastPulledDevice && status.lastPulledBackupAt) {
+            const date = new Date(status.lastPulledBackupAt);
+            lines.push(t('cloud.sync.pulled', { device: status.lastPulledDevice, date: renderDate(date), time: renderTime(date) }));
+            if (status.lastPulledSavesSkipped > 0)
+                lines.push(t('cloud.sync.saves-skipped', { count: status.lastPulledSavesSkipped }));
+        }
+        if (status.lastSyncAt) {
+            const date = new Date(status.lastSyncAt);
+            lines.push(t('cloud.sync.checked', { date: renderDate(date), time: renderTime(date) }));
+        }
+        return lines.length > 0
+            ? lines.map(line => <div key={line}>{line}</div>)
+            : t('cloud.sync.never');
+    };
+
     return <>
         <UISettingsSection
             title={t('cloud.account.title')}
@@ -110,6 +153,22 @@ export const SettingsCloudAccount: React.FC = () => {
                 label={t('cloud.backup.label')}
                 description={renderBackup()}
             />}
+
+            {status.loggedIn && <UISettingsRow icon={<RefreshCwIcon />}
+                label={t('cloud.sync.label')}
+                description={renderSync()}
+            >
+                <UIButton
+                    name='cloud-sync'
+                    controlLabel={t('cloud.sync.now')}
+                    onClick={syncNow}
+                    loading={syncMutation.isPending}
+                    disabled={status.syncState === CloudSyncState.CHECKING || status.syncState === CloudSyncState.PULLING}
+                    leftSection={<RefreshCwIcon />}
+                >
+                    {t('cloud.sync.now')}
+                </UIButton>
+            </UISettingsRow>}
 
             <UISettingsRow icon={<ServerIcon />}
                 label={t('cloud.server.label')}

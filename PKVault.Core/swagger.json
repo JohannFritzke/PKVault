@@ -225,6 +225,26 @@
         }
       }
     },
+    "/api/cloud/sync": {
+      "post": {
+        "tags": [
+          "Cloud"
+        ],
+        "operationId": "Cloud_Sync",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloudStatusDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/dex": {
       "get": {
         "tags": [
@@ -4452,7 +4472,10 @@
         "required": [
           "serverUrl",
           "loggedIn",
-          "loginState"
+          "loginState",
+          "syncState",
+          "syncRevision",
+          "lastPulledSavesSkipped"
         ],
         "properties": {
           "serverUrl": {
@@ -4490,6 +4513,34 @@
             "format": "date-time"
           },
           "backupError": {
+            "type": "string"
+          },
+          "syncState": {
+            "$ref": "#/components/schemas/CloudSyncState"
+          },
+          "lastSyncAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "syncRevision": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastPulledDevice": {
+            "type": "string"
+          },
+          "lastPulledBackupAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastPulledSavesSkipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "syncError": {
+            "$ref": "#/components/schemas/CloudSyncError"
+          },
+          "syncErrorDetail": {
             "type": "string"
           }
         }
@@ -4531,6 +4582,38 @@
           "PENDING",
           "SUCCESS",
           "FAILED"
+        ],
+        "enum": [
+          0,
+          1,
+          2
+        ]
+      },
+      "CloudSyncState": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "IDLE",
+          "CHECKING",
+          "PULLING",
+          "WAITING_LOCAL_CHANGES",
+          "ERROR"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "CloudSyncError": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "SERVER",
+          "INVALID_BACKUP",
+          "UNSUPPORTED_PATHS"
         ],
         "enum": [
           0,
