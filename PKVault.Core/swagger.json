@@ -788,6 +788,46 @@
         }
       }
     },
+    "/api/single-location/resolve": {
+      "post": {
+        "tags": [
+          "SingleLocation"
+        ],
+        "operationId": "SingleLocation_Resolve",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleLocationResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/single-location/status": {
+      "get": {
+        "tags": [
+          "SingleLocation"
+        ],
+        "operationId": "SingleLocation_Status",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleLocationStatusDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/static-data": {
       "get": {
         "tags": [
@@ -5529,6 +5569,56 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "SingleLocationResultDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success",
+          "removed"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/SingleLocationError"
+          },
+          "removed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SingleLocationError": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "PENDING_CHANGES",
+          "FAILED"
+        ],
+        "enum": [
+          0,
+          1
+        ]
+      },
+      "SingleLocationStatusDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "inSaveCount",
+          "linkOnlyCount"
+        ],
+        "properties": {
+          "inSaveCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "linkOnlyCount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

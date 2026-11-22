@@ -21,6 +21,8 @@ namespace PKVault.Core;
 [JsonSerializable(typeof(TradeCounterRequestDTO))]
 [JsonSerializable(typeof(TradeActionResultDTO))]
 [JsonSerializable(typeof(List<PokemonHistoryEntryDTO>))]
+[JsonSerializable(typeof(SingleLocationStatusDTO))]
+[JsonSerializable(typeof(SingleLocationResultDTO))]
 [JsonSerializable(typeof(DirectoryContent))]
 [JsonSerializable(typeof(WarningsDTO))]
 [JsonSerializable(typeof(List<BankDTO>))]

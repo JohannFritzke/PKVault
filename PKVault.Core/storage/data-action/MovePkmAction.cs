@@ -29,6 +29,9 @@ public class MovePkmAction(
             throw new ArgumentException($"Pkm ids and box slots should have same length");
         }
 
+        // fork: a pokémon is either in a save or in the storage, never both (see single-location/)
+        SingleLocation.ThrowIfAttached(input.attached);
+
         var sourceBoxId = (await GetPkmSlot(input.sourceSaveId, input.pkmIds[0])).BoxId;
 
         BoxDTO? sourceBox = input.sourceSaveId != null
@@ -235,6 +238,9 @@ public class MovePkmAction(
         // if pkmVariant for context doesn't exist
         // create pkmVariant
         // and retry action
+        // fork: never to an older generation than the pokémon (data would be lost)
+        SingleLocation.ThrowIfOlderGeneration(pkmVariants, saveLoaders.Save.Generation);
+
         if (pkmVariantForContext == default)
         {
             var mainVariant = pkmVariants.First(variant => variant.IsMain);
@@ -245,9 +251,9 @@ public class MovePkmAction(
             ), flags);
 
             // now pkmVariant for context is created
-            // so retry the action, with attached mode
+            // so retry the action (fork: keeps the attached mode of the input, all variants leave the storage)
             return await MainToSave(
-                new(input.pkmIds, input.sourceSaveId, input.targetSaveId, input.targetBoxId, input.targetBoxSlots, true),
+                new(input.pkmIds, input.sourceSaveId, input.targetSaveId, input.targetBoxId, input.targetBoxSlots, input.attached),
                 flags,
                 pkmVariantId,
                 sourceBox,
@@ -258,7 +264,7 @@ public class MovePkmAction(
 
         // if move not-attached with multiple variants
         // retry as attached
-        if (!input.attached && pkmVariants.Count > 1)
+        if (!input.attached && pkmVariants.Count > 1 && !SingleLocation.Enabled)
         {
             // retry the action, with attached mode
             return await MainToSave(
@@ -340,10 +346,12 @@ public class MovePkmAction(
     {
         var saveLoaders = savesLoadersService.GetLoadersRequired(targetSaveId);
 
-        if (!input.attached && relatedPkmVariants.Count > 1)
+        if (!input.attached && relatedPkmVariants.Count > 1 && !SingleLocation.Enabled)
         {
             throw new ArgumentException($"Not-attached move from main to save requires a single version");
         }
+
+        SingleLocation.ThrowIfOlderGeneration(relatedPkmVariants, saveLoaders.Save.Generation);
 
         var pkmVariant = relatedPkmVariants.Find(version => version.Context == saveLoaders.Save.Context);
 
@@ -396,7 +404,11 @@ public class MovePkmAction(
         }
         else
         {
-            await pkmVariantLoader.DeleteEntity(pkmVariant);
+            // fork: every variant leaves the storage with the pokémon
+            foreach (var variant in SingleLocation.Enabled ? relatedPkmVariants : [ pkmVariant ])
+            {
+                await pkmVariantLoader.DeleteEntity(variant);
+            }
         }
 
         if (input.attached && (await pkmVariantLoader.GetEntityBySave(pkmSaveDTO.SaveId, pkmSaveDTO.IdBase)) == null)

@@ -148,6 +148,7 @@ public class Program
         services.AddBackupProviders();
         services.AddCloud();
         services.AddTrades();
+        services.AddSingleLocation();
 
         Log.Information($"Setup services - Finished");
     }

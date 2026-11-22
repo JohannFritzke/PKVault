@@ -9,6 +9,9 @@ public class DetachPkmSaveAction(
 {
     protected override async Task<DataActionPayload> Execute(DetachPkmSaveActionInput input, DataUpdateFlags flags)
     {
+        // fork: detaching would leave two copies of the same pokémon (see single-location/)
+        SingleLocation.ThrowIfAttached(true);
+
         if (input.pkmVariantIds.Length == 0)
         {
             throw new ArgumentException($"Pkm version ids cannot be empty");

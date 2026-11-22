@@ -40,6 +40,7 @@ public partial class CoreRouter
         typeof(SaveDiscoveryController),
         typeof(CloudController),
         typeof(TradeController),
+        typeof(PKVault.Core.SingleLocationRoutes.SingleLocationController),
     ];
 
     // "GET", "api/static-data/spritesheet/{sheetName}", MethodInfo, (ParameterInfo, Kind)[], "StaticData", "GetSpritesheetImg"
