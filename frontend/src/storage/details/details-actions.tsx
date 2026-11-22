@@ -12,7 +12,9 @@ import { EditPkmButton } from './actions/edit-pkm-button';
 import { EvolvePkmButton } from './actions/evolve-pkm-button';
 import { MoveAttachedButton } from './actions/move-attached-button';
 import { MoveButton } from './actions/move-button';
+import { OfferTradeButton } from './actions/offer-trade-button';
 import { ReleasePkmButton, type ReleasePkmButtonProps } from './actions/release-pkm-button';
+import { TradeHistoryButton } from './actions/trade-history-button';
 
 type DetailsActionsProps =
     & Pick<UIButtonProps, 'focusOnMount'>
@@ -93,6 +95,18 @@ export const DetailsActions: React.FC<DetailsActionsProps> = ({ focusOnMount, id
                 pkmIds={ids}
                 saveId={saveId}
             />
+
+            {!isInventory && <>
+                <OfferTradeButton
+                    pkmIds={ids}
+                    saveId={saveId}
+                />
+
+                <TradeHistoryButton
+                    pkmIds={ids}
+                    saveId={saveId}
+                />
+            </>}
 
             <ReleasePkmButton
                 pkmIds={ids}

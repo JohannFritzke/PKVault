@@ -1,6 +1,6 @@
 import { Group, Tooltip } from '@mantine/core';
 import { useMatches } from '@tanstack/react-router';
-import { ArchiveIcon, BookOpenIcon, InfoIcon, RefreshCwIcon, SaveIcon } from 'lucide-react';
+import { ArchiveIcon, ArrowLeftRightIcon, BookOpenIcon, InfoIcon, RefreshCwIcon, SaveIcon } from 'lucide-react';
 import type React from 'react';
 import { useSaveInfosScan } from '../data/sdk/save-infos/save-infos.gen';
 import { useSettingsGet } from '../data/sdk/settings/settings.gen';
@@ -67,6 +67,17 @@ export const Header: React.FC = () => {
             >
                 {t('header.dex')}
             </UIHeaderItem>
+
+            <UIHeaderItem
+                id={'trades' satisfies HeaderValue}
+                to={"/trades"}
+                selected={value === 'trades'}
+                label={t('header.trades')}
+                leftSection={<ArrowLeftRightIcon />}
+                noLabelMobileScreen
+            >
+                {t('header.trades')}
+            </UIHeaderItem>
         </>}
         right={<>
             <Tooltip
@@ -130,6 +141,7 @@ export const Header: React.FC = () => {
             'saves': () => null,
             'saves/discovery': () => null,
             'settings': () => <SettingsSubMenu />,
+            'trades': () => null,
             '': () => null,
         })()}
     />;

@@ -1,0 +1,97 @@
+.ui-trade-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+    min-width: 0;
+    padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: var(--mantine-radius-lg);
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+}
+
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--mantine-spacing-sm);
+    font-size: 14px;
+}
+
+.people {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 600;
+}
+
+.date {
+    font-size: 13px;
+    color: var(--mantine-color-dimmed);
+}
+
+.pokemons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: var(--mantine-spacing-md);
+}
+
+.arrow {
+    display: flex;
+    align-items: center;
+    color: var(--mantine-color-dimmed);
+}
+
+.pokemon {
+    display: flex;
+    flex: 1 1 220px;
+    align-items: center;
+    gap: var(--mantine-spacing-sm);
+    min-width: 0;
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: var(--mantine-radius-sm);
+}
+
+.pokemon[data-empty="true"] {
+    justify-content: center;
+    border-style: dashed;
+    font-size: 13px;
+    color: var(--mantine-color-dimmed);
+}
+
+.pokemon-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.pokemon-name {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.pokemon-meta {
+    font-size: 13px;
+    color: var(--mantine-color-dimmed);
+}
+
+.message {
+    padding-left: var(--mantine-spacing-sm);
+    border-left: 2px solid var(--mantine-color-default-border);
+    font-size: 14px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--mantine-spacing-sm);
+}
+
+.actions:empty {
+    display: none;
+}

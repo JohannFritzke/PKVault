@@ -1774,6 +1774,228 @@
         }
       }
     },
+    "/api/trade/{tradeId}/accept": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Accept",
+        "parameters": [
+          {
+            "name": "tradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeActionResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/{tradeId}/cancel": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Cancel",
+        "parameters": [
+          {
+            "name": "tradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeActionResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/{tradeId}/counter": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Counter",
+        "parameters": [
+          {
+            "name": "tradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeCounterRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeActionResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/{tradeId}/decline": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Decline",
+        "parameters": [
+          {
+            "name": "tradeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeActionResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/history/{pkmVariantId}": {
+      "get": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_History",
+        "parameters": [
+          {
+            "name": "pkmVariantId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PokemonHistoryEntryDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/offer": {
+      "post": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Offer",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TradeOfferRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradeActionResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/trade/status": {
+      "get": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Status",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TradesStatusDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/warnings/warnings": {
       "get": {
         "tags": [
@@ -4475,7 +4697,8 @@
           "loginState",
           "syncState",
           "syncRevision",
-          "lastPulledSavesSkipped"
+          "lastPulledSavesSkipped",
+          "tradeClaimRevision"
         ],
         "properties": {
           "serverUrl": {
@@ -4542,6 +4765,10 @@
           },
           "syncErrorDetail": {
             "type": "string"
+          },
+          "tradeClaimRevision": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -5703,6 +5930,298 @@
           },
           "editPayload": {
             "$ref": "#/components/schemas/EditPkmVariantPayload"
+          }
+        }
+      },
+      "TradeActionResultDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "success"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "error": {
+            "$ref": "#/components/schemas/TradeError"
+          },
+          "errorDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeError": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "NOT_LOGGED_IN",
+          "PENDING_CHANGES",
+          "CANNOT_TRADE",
+          "NOT_FOUND",
+          "SERVER"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "TradeCounterRequestDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pkmVariantId"
+        ],
+        "properties": {
+          "pkmVariantId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PokemonHistoryEntryDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fromName",
+          "toName",
+          "date"
+        ],
+        "properties": {
+          "fromName": {
+            "type": "string"
+          },
+          "toName": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeOfferRequestDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pkmVariantId",
+          "toUserId"
+        ],
+        "properties": {
+          "pkmVariantId": {
+            "type": "string"
+          },
+          "toUserId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "TradesStatusDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "loggedIn",
+          "trades",
+          "friends",
+          "toClaimCount",
+          "claimRevision"
+        ],
+        "properties": {
+          "loggedIn": {
+            "type": "boolean"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "trades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeDTO"
+            }
+          },
+          "friends": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TradeUserDTO"
+            }
+          },
+          "toClaimCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "claimRevision": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "$ref": "#/components/schemas/TradeError"
+          },
+          "errorDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "status",
+          "fromUserId",
+          "fromName",
+          "toUserId",
+          "toName",
+          "isSender",
+          "created",
+          "expiresAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TradeStatus"
+          },
+          "fromUserId": {
+            "type": "string"
+          },
+          "fromName": {
+            "type": "string"
+          },
+          "toUserId": {
+            "type": "string"
+          },
+          "toName": {
+            "type": "string"
+          },
+          "isSender": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "counterMessage": {
+            "type": "string"
+          },
+          "offered": {
+            "$ref": "#/components/schemas/TradePokemonSummaryDTO"
+          },
+          "countered": {
+            "$ref": "#/components/schemas/TradePokemonSummaryDTO"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TradeStatus": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "OPEN",
+          "COUNTERED",
+          "DONE",
+          "DECLINED",
+          "CANCELLED",
+          "EXPIRED"
+        ],
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      },
+      "TradePokemonSummaryDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "species",
+          "form",
+          "nickname",
+          "level",
+          "shiny",
+          "gender",
+          "otName",
+          "tid",
+          "version",
+          "format",
+          "fingerprint"
+        ],
+        "properties": {
+          "species": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "form": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "shiny": {
+            "type": "boolean"
+          },
+          "gender": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "otName": {
+            "type": "string"
+          },
+          "tid": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "format": {
+            "type": "string"
+          },
+          "fingerprint": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeUserDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },
