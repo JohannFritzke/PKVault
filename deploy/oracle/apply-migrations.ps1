@@ -1,5 +1,5 @@
-# Sends deploy/oracle/pb_migrations/*.js to the PokéHome VM and restarts PocketBase,
-# which applies any new migration on startup.
+# Sends deploy/oracle/pb_migrations/*.js and deploy/oracle/pb_hooks/*.pb.js to the PokéHome VM
+# and restarts PocketBase, which applies new migrations and loads hooks on startup.
 # Run from the repo root:
 #   powershell -ExecutionPolicy Bypass -File deploy\oracle\apply-migrations.ps1
 param(
@@ -8,21 +8,28 @@ param(
 )
 $ErrorActionPreference = "Stop"
 
-$dir = Join-Path $PSScriptRoot "pb_migrations"
-$files = Get-ChildItem $dir -Filter *.js
-if (-not $files) { Write-Host "No migrations in $dir"; exit 0 }
+$folders = @("pb_migrations", "pb_hooks")
 
-ssh -i $Key $Server "mkdir -p /tmp/pb_migrations && rm -f /tmp/pb_migrations/*.js"
-foreach ($f in $files) {
-    Write-Host "-> $($f.Name)"
-    scp -q -i $Key $f.FullName "${Server}:/tmp/pb_migrations/"
+ssh -i $Key $Server "rm -rf /tmp/pb_deploy && mkdir -p /tmp/pb_deploy/pb_migrations /tmp/pb_deploy/pb_hooks"
+foreach ($folder in $folders) {
+    $dir = Join-Path $PSScriptRoot $folder
+    if (-not (Test-Path $dir)) { continue }
+    foreach ($f in Get-ChildItem $dir -Filter *.js) {
+        Write-Host "-> $folder/$($f.Name)"
+        scp -q -i $Key $f.FullName "${Server}:/tmp/pb_deploy/$folder/"
+    }
 }
 
 $remote = @'
 set -e
-sudo mkdir -p /opt/pocketbase/pb_migrations
-sudo sh -c 'for f in /tmp/pb_migrations/*.js; do tr -d "\r" < "$f" > "/opt/pocketbase/pb_migrations/$(basename "$f")"; done'
-sudo chown -R pocketbase:pocketbase /opt/pocketbase/pb_migrations
+for folder in pb_migrations pb_hooks; do
+    sudo mkdir -p "/opt/pocketbase/$folder"
+    for f in /tmp/pb_deploy/$folder/*.js; do
+        [ -e "$f" ] || continue
+        sudo sh -c "tr -d '\r' < '$f' > '/opt/pocketbase/$folder/$(basename "$f")'"
+    done
+    sudo chown -R pocketbase:pocketbase "/opt/pocketbase/$folder"
+done
 sudo systemctl restart pocketbase
 sleep 3
 systemctl is-active pocketbase
