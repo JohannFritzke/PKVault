@@ -2,9 +2,9 @@
 
 // Trade routes (phase 4). Every state change happens here, in one transaction.
 //
-//   POST /api/pokehome/trades                  offer a pokémon to a friend (multipart: to, message, file + display fields)
-//   POST /api/pokehome/trades/{id}/counter     receiver offers one back (multipart: counterMessage, file + display fields)
-//   POST /api/pokehome/trades/{id}/accept      receiver on OPEN = accept as a gift; sender on COUNTERED = exchange
+//   POST /api/pokehome/trades                  offer a pokémon to a friend (multipart: to, kind TRADE|GIFT, message, file + display fields)
+//   POST /api/pokehome/trades/{id}/counter     receiver answers a TRADE with a pokémon (multipart: counterMessage, file + display fields)
+//   POST /api/pokehome/trades/{id}/accept      receiver on an OPEN GIFT = take it; sender on COUNTERED = exchange
 //   POST /api/pokehome/trades/{id}/decline     receiver (OPEN/COUNTERED) or sender (COUNTERED): pokémon go back
 //   POST /api/pokehome/trades/{id}/cancel      sender (OPEN/COUNTERED): pokémon go back
 //   POST /api/pokehome/pokemon/{id}/claimed    the owner's app stored the pokémon locally: the server copy is deleted
@@ -16,6 +16,10 @@ routerAdd("POST", "/api/pokehome/trades", (e) => {
     const me = e.auth.id;
     const body = e.requestInfo().body;
     const to = String(lib.readBodyValue(body, "to") || "");
+    const kind = String(lib.readBodyValue(body, "kind") || "TRADE");
+    if (kind !== "TRADE" && kind !== "GIFT") {
+        throw new BadRequestError("Unknown trade kind.");
+    }
 
     if (!to || to === me) {
         throw new BadRequestError("Choose a friend to trade with.");
@@ -40,6 +44,7 @@ routerAdd("POST", "/api/pokehome/trades", (e) => {
         trade.set("from", me);
         trade.set("to", to);
         trade.set("status", "OPEN");
+        trade.set("kind", kind);
         trade.set("message", String(lib.readBodyValue(body, "message") || "").slice(0, 300));
         trade.set("offered", pokemon.id);
         trade.set("offeredSummary", lib.summary(pokemon));
@@ -66,6 +71,9 @@ routerAdd("POST", "/api/pokehome/trades/{id}/counter", (e) => {
         }
         if (trade.getString("status") !== "OPEN") {
             throw new BadRequestError("This trade is not open anymore.");
+        }
+        if (trade.getString("kind") === "GIFT") {
+            throw new BadRequestError("A gift cannot be answered with a pokémon.");
         }
 
         const pokemon = lib.createCustodyPokemon(e, txApp, me, trade.id);
@@ -98,8 +106,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/accept", (e) => {
             throw new BadRequestError("The offered pokémon is not in custody anymore.");
         }
 
-        if (status === "OPEN" && me === to) {
-            // gift
+        if (status === "OPEN" && me === to && trade.getString("kind") === "GIFT") {
             lib.giveTo(txApp, offered, to);
             lib.addHistory(txApp, offered, from, to, trade.id);
         } else if (status === "COUNTERED" && me === from) {

@@ -73,8 +73,8 @@ def pk(fp, species=25, nick="PIKA"):
 PIKA = b"PK3-PIKACHU-BYTES"
 EEVEE = b"PK3-EEVEE-BYTES"
 
-def offer(token, to, fp="fp-pika", content=PIKA, message="quero um eevee"):
-    return req("POST", "/api/pokehome/trades", token, {**pk(fp), "to": to, "message": message}, {"file": ("pika.pk3", content)})
+def offer(token, to, fp="fp-pika", content=PIKA, message="quero um eevee", kind="TRADE"):
+    return req("POST", "/api/pokehome/trades", token, {**pk(fp), "to": to, "message": message, "kind": kind}, {"file": ("pika.pk3", content)})
 
 # --- validation
 st, r = req("POST", "/api/pokehome/trades", None, {**pk("x"), "to": b_id}, {"file": ("x.pk3", b"x")})
@@ -88,7 +88,7 @@ check("records API: direct trade creation refused", st in (400, 403), (st, r))
 
 # --- exchange: offer -> counter -> accept
 st, t = offer(A, b_id)
-check("offer: created OPEN", st == 200 and t["status"] == "OPEN", (st, t))
+check("offer: created OPEN", st == 200 and t["status"] == "OPEN" and t["kind"] == "TRADE", (st, t))
 tid = t["id"]
 offered_id = t["offered"]
 check("offer: summary stored", t.get("offeredSummary", {}).get("species") == 25 and t["offeredSummary"]["shiny"] is True, t)
@@ -106,6 +106,10 @@ st, r = req("POST", f"/api/pokehome/trades/{tid}/accept", C)
 check("accept: stranger refused", st == 400, (st, r))
 st, r = req("POST", f"/api/pokehome/trades/{tid}/accept", A)
 check("accept: sender cannot accept an OPEN trade", st == 400, (st, r))
+st, r = req("POST", f"/api/pokehome/trades/{tid}/accept", B)
+check("accept: receiver cannot take a TRADE without answering", st == 400, (st, r))
+st, r = offer(A, b_id, "x", kind="LOAN")
+check("offer: unknown kind refused", st == 400, (st, r))
 st, r = req("POST", f"/api/pokehome/trades/{tid}/counter", A, pk("fp-eevee", 133, "EEVEE"), {"file": ("e.pk3", EEVEE)})
 check("counter: sender refused", st == 403, (st, r))
 
@@ -150,7 +154,10 @@ check("claim: trade kept with summary after claim", st == 200 and r["offeredSumm
 req("POST", f"/api/pokehome/pokemon/{mine_a[0]['id']}/claimed", A)
 
 # --- gift
-st, t = offer(A, b_id, "fp-gift")
+st, t = offer(A, b_id, "fp-gift", kind="GIFT")
+check("gift: created as GIFT", st == 200 and t["kind"] == "GIFT", (st, t))
+st, r = req("POST", f"/api/pokehome/trades/{t['id']}/counter", B, pk("fp-g2", 1, "B"), {"file": ("b.pk3", b"B")})
+check("gift: cannot be countered", st == 400, (st, r))
 st, t = req("POST", f"/api/pokehome/trades/{t['id']}/accept", B)
 check("gift: receiver accepts OPEN -> DONE", st == 200 and t["status"] == "DONE", (st, t))
 st, r = req("GET", f"/api/collections/trade_pokemon/records/{t['offered']}", B)
