@@ -8,8 +8,10 @@ import { FlatpakMigrateDialog } from '../help/flatpak-migrate-dialog';
 import { HelpDialog } from '../help/help-dialog';
 import { WelcomeDialog } from '../help/welcome-dialog';
 import { useStaticData } from '../hooks/use-static-data';
+import { SingleLocationDialog } from '../single-location/single-location-dialog';
 import { ActionsPanel } from '../storage/actions/actions-panel';
 import { MoveSelectImplProvider } from '../storage/move/move-select-impl-provider';
+import { TradesWatcher } from '../trades/trades-watcher';
 import type { IsItemCompatibleFn } from '../storage/move/validation/rules/validate-common';
 import { useTranslate } from '../translate/i18n';
 import { StorageModeProvider } from '../ui/inventory/context/storage-mode-provider';
@@ -53,6 +55,8 @@ export const RootPage: React.FC = () => {
             <WelcomeDialog />
             <FlatpakMigrateDialog />
             <CloudSyncWatcher />
+            <TradesWatcher />
+            <SingleLocationDialog />
           </UIAppLayout>
         </MoveSelectImplProvider>
       </StorageModeProvider>

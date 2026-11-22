@@ -10,7 +10,6 @@ import { useSelectCallback } from '../../util/use-select-callback';
 import type { MoveContainerValue } from '../move/move-container-fns';
 import { EditPkmButton } from './actions/edit-pkm-button';
 import { EvolvePkmButton } from './actions/evolve-pkm-button';
-import { MoveAttachedButton } from './actions/move-attached-button';
 import { MoveButton } from './actions/move-button';
 import { OfferTradeButton } from './actions/offer-trade-button';
 import { ReleasePkmButton, type ReleasePkmButtonProps } from './actions/release-pkm-button';
@@ -79,13 +78,6 @@ export const DetailsActions: React.FC<DetailsActionsProps> = ({ focusOnMount, id
         />
 
         {storageMode === 'default' && <>
-            <MoveAttachedButton
-                pkmIds={ids}
-                saveId={saveId}
-                // eslint-disable-next-line react-hooks/refs
-                useDrag={dragging.useDrag}
-            />
-
             <EditPkmButton
                 pkmIds={ids}
                 saveId={saveId}

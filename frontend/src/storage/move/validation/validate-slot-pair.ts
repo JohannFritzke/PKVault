@@ -5,6 +5,7 @@ import { validateMainToSave } from './rules/validate-main-to-save';
 import { validateSaveToMain } from './rules/validate-save-to-main';
 import { validateSaveToSave } from './rules/validate-save-to-save';
 import type { DropValidationResult, SlotInfos } from './types';
+import { contextGeneration } from './utils/context-generation';
 
 export const validateSlotPair = (
     info: SlotInfos,
@@ -34,7 +35,12 @@ export const validateSlotPair = (
             const sourceForContext = relatedPkmVariants.find(variant => variant.context === context);
             const sourceAttached = relatedPkmVariants.find(variant => variant.attachedSaveId);
 
-            attached ||= relatedPkmVariants.length > 1 || !sourceForContext;
+            // fork: never attached, every variant leaves the storage with the pokémon;
+            // and never to an older generation than the pokémon (data would be lost)
+            const mainVariant = relatedPkmVariants.find(variant => variant.isMain) ?? relatedPkmVariants[ 0 ];
+            if (mainVariant && contextGeneration(mainVariant.context) > contextGeneration(info.targetSave.context)) {
+                return { canDrop: false, reason: 'main-to-save-older-generation', slotInfos: info };
+            }
 
             return validateMainToSave(
                 info,

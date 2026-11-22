@@ -16,6 +16,7 @@ export type DropRefusalReason =
     | 'attached-main-to-main'
     | 'attached-save-to-save'
     | 'main-to-save-incompatible-version'
+    | 'main-to-save-older-generation'
     | 'main-cannot-move-to-save'
     | 'main-disabled-to-save'
     | 'main-no-variant-to-save-occupied'

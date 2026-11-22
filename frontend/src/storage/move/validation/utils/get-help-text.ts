@@ -39,6 +39,9 @@ export const getHelpText = (reason: DropRefusalReason, info: SlotInfos | undefin
         case 'main-to-save-incompatible-version': return t('storage.move.main-incompatible-version', {
             name: sourcePkm?.nickname,
         });
+        case 'main-to-save-older-generation': return t('storage.move.main-older-generation', {
+            name: sourcePkm?.nickname,
+        });
         case 'main-cannot-move-to-save':
             if (info?.direction === 'main-to-save' && (sourcePkm as PkmVariantDTO | undefined)?.attachedSaveId) {
                 return t('storage.move.pkm-cannot-attached-already', {

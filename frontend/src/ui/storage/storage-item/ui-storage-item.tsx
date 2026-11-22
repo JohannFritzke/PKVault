@@ -1,7 +1,6 @@
 import { Checkbox, useMatches, type MantineSize } from '@mantine/core';
 import { useMergedRef } from '@mantine/hooks';
 import React from 'react';
-import type { MoveParams } from '../../../storage/move/move-container-fns';
 import { useTranslate } from '../../../translate/i18n';
 import { WithControlsIcons } from '../../interaction/controls/icons/with-controls-icons';
 import { useDragControls } from '../../interaction/focus-controls/common-controls/drag-controls';
@@ -49,7 +48,6 @@ export const UIStorageItem: React.FC<UIStorageItemProps> = ({
 
     const dragging = useDragging(id, container);
     const draggingMove = dragging.useDrag();
-    const draggingMoveAttached = dragging.useDrag<MoveParams>({ attached: true });
 
     const droppable = useDroppable({
         targetContainer: container,
@@ -63,11 +61,9 @@ export const UIStorageItem: React.FC<UIStorageItemProps> = ({
 
     disabled ||= droppable.canDrop === false || (!isDraggingState && storageMode === 'inventory' && !draggingMove.enabled);
     loading ||= submitting;
-    // console.log(id, dragging, draggingMove, draggingMoveAttached)
     const dragControls = useDragControls({
         dragging,
         draggingMove,
-        draggingMoveAttached,
         droppable,
         disabled: disabled || loading,
     });

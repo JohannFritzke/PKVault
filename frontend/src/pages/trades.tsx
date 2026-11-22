@@ -50,9 +50,8 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
     const [ lastResult, setLastResult ] = React.useState<TradeActionResultDTO>();
     const [ answering, setAnswering ] = React.useState<TradeDTO>();
 
-    const statusQuery = useTradeStatus({
-        query: { refetchInterval: 15_000 },
-    });
+    // kept up to date by TradesWatcher
+    const statusQuery = useTradeStatus();
     const status = statusQuery.data?.data;
 
     const acceptMutation = useTradeAccept();
