@@ -326,11 +326,25 @@ public sealed class TradeLocalStorage(IServiceProvider sp) : ITradeLocalStorage
         // the same pokémon somewhere else (a save after "detach", or another storage slot): trading it would duplicate it
         var hashes = slotVariants.Select(v => v.Hash).Where(h => !string.IsNullOrEmpty(h)).ToHashSet();
         var elsewhereInStorage = (await loader.GetAllEntities()).Values
-            .Any(v => hashes.Contains(v.Hash) && (v.BoxId != entity.BoxId || v.BoxSlot != entity.BoxSlot));
+            .FirstOrDefault(v => hashes.Contains(v.Hash) && (v.BoxId != entity.BoxId || v.BoxSlot != entity.BoxSlot));
+        if (elsewhereInStorage != null)
+        {
+            var boxLoader = scope.ServiceProvider.GetService<IBoxLoader>();
+            var box = boxLoader == null ? null : await boxLoader.GetEntity(elsewhereInStorage.BoxId);
+            var where = elsewhereInStorage.IsExternal ? "external files" : $"storage box \"{box?.Name ?? elsewhereInStorage.BoxId}\"";
+            Log.Warning($"Trades: {entity.Id} ({entity.BoxId}/{entity.BoxSlot}, hash {elsewhereInStorage.Hash}) has a copy {elsewhereInStorage.Id} at {elsewhereInStorage.BoxId}/{elsewhereInStorage.BoxSlot}"
+                + $" main={elsewhereInStorage.IsMain} external={elsewhereInStorage.IsExternal} attached={elsewhereInStorage.AttachedSaveId} file={elsewhereInStorage.Filepath}");
+            throw new TradeException(TradeError.DUPLICATE, $"Other copy: {where}, slot {elsewhereInStorage.BoxSlot + 1}");
+        }
         var inSave = sp.GetService<ISavesLoadersService>()?.GetAllLoaders()
-            .Any(save => hashes.Any(hash => !save.Pkms.GetDtosByIdBase(hash).IsEmpty)) ?? false;
-        if (elsewhereInStorage || inSave)
-            throw new TradeException(TradeError.DUPLICATE, "Another copy of this pokémon exists in a save or in the storage");
+            .FirstOrDefault(save => hashes.Any(hash => !save.Pkms.GetDtosByIdBase(hash).IsEmpty));
+        if (inSave != null)
+        {
+            var found = hashes.SelectMany(hash => inSave.Pkms.GetDtosByIdBase(hash).Values).FirstOrDefault();
+            Log.Warning($"Trades: {entity.Id} ({entity.BoxId}/{entity.BoxSlot}) has a copy in save {inSave.Save.Id} {inSave.Save.Metadata.FilePath}"
+                + $" box={found?.BoxId} slot={found?.BoxSlot} species={found?.Species} hashes={string.Join(",", hashes)}");
+            throw new TradeException(TradeError.DUPLICATE, $"Other copy: save {inSave.Save.Version} ({inSave.Save.OT}), box {found?.BoxId + 1}, slot {found?.BoxSlot + 1}");
+        }
 
         var main = slotVariants.FirstOrDefault(v => v.IsMain) ?? entity;
         var pkm = await loader.GetPKM(main);

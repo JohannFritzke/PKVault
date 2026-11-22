@@ -445,11 +445,30 @@ public class TradeTests : IAsyncDisposable
 
         var ex = await Assert.ThrowsAsync<TradeException>(() => local.PrepareOutgoing(first.Id));
         Assert.Equal(TradeError.DUPLICATE, ex.Error);
+        Assert.Contains("slot 2", ex.Message);
 
         // a unique pokémon is fine
         var outgoing = await local.PrepareOutgoing(other.Id);
         Assert.Equal(other.Id, outgoing.VariantId);
         Assert.Equal("pk3", outgoing.Upload.Format);
+    }
+
+    [Fact]
+    public async Task ReceivedPokemon_CanBeSentBack()
+    {
+        var (action, variants) = await NewReceiveAction(slotCount: 30, occupied: 2);
+        var local = LocalStorageOver(variants);
+
+        // what the sender uploads, as the receiver parses it
+        var sent = await local.PrepareOutgoing((await variants.GetEntitiesByBox("1", 0)).Values.Single().Id);
+        var received = TradeLocalStorage.Parse(sent.Upload.Content, sent.Upload.Format)!;
+        await variants.DeleteEntity((await variants.GetEntity(sent.VariantId))!);
+
+        var input = new TradeReceivePkmActionInput(received);
+        await action.ExecuteWithPayload(input, new());
+
+        var back = await local.PrepareOutgoing(input.CreatedVariantId!);
+        Assert.Equal(sent.Upload.Fingerprint, back.Upload.Fingerprint);
     }
 
     private static TradeLocalStorage LocalStorageOver(PkmVariantLoader variants)
