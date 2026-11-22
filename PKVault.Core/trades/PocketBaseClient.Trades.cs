@@ -83,11 +83,12 @@ public partial class PocketBaseClient
     }
 
     public async Task<PocketBaseTradeRecord> CreateTradeOffer(
-        string serverUrl, string token, string toUserId, string? message, TradePokemonUpload pokemon, CancellationToken ct
+        string serverUrl, string token, string toUserId, string? message, TradeKind kind, TradePokemonUpload pokemon, CancellationToken ct
     )
     {
         using var form = PokemonForm(pokemon);
         form.Add(new StringContent(toUserId), "to");
+        form.Add(new StringContent(kind.ToString()), "kind");
         form.Add(new StringContent(message ?? ""), "message");
 
         using var doc = await SendJson(HttpMethod.Post, $"{serverUrl}/api/pokehome/trades", form, token, ct);
@@ -146,6 +147,7 @@ public partial class PocketBaseClient
         From: Str(item, "from") ?? "",
         To: Str(item, "to") ?? "",
         Status: Enum.TryParse<TradeStatus>(Str(item, "status"), out var status) ? status : TradeStatus.OPEN,
+        Kind: Str(item, "kind") == "GIFT" ? TradeKind.GIFT : TradeKind.TRADE,
         Message: Str(item, "message"),
         CounterMessage: Str(item, "counterMessage"),
         Offered: ReadSummary(item, "offeredSummary"),
@@ -185,7 +187,7 @@ public partial class PocketBaseClient
 }
 
 public record PocketBaseTradeRecord(
-    string Id, string From, string To, TradeStatus Status, string? Message, string? CounterMessage,
+    string Id, string From, string To, TradeStatus Status, TradeKind Kind, string? Message, string? CounterMessage,
     TradePokemonSummaryDTO? Offered, TradePokemonSummaryDTO? Countered,
     DateTime Created, DateTime ExpiresAt, DateTime? ClosedAt
 );

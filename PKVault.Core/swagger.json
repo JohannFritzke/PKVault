@@ -5958,6 +5958,7 @@
           "NOT_LOGGED_IN",
           "PENDING_CHANGES",
           "CANNOT_TRADE",
+          "DUPLICATE",
           "NOT_FOUND",
           "SERVER"
         ],
@@ -5966,7 +5967,8 @@
           1,
           2,
           3,
-          4
+          4,
+          5
         ]
       },
       "TradeCounterRequestDTO": {
@@ -6010,7 +6012,8 @@
         "additionalProperties": false,
         "required": [
           "pkmVariantId",
-          "toUserId"
+          "toUserId",
+          "gift"
         ],
         "properties": {
           "pkmVariantId": {
@@ -6021,6 +6024,9 @@
           },
           "message": {
             "type": "string"
+          },
+          "gift": {
+            "type": "boolean"
           }
         }
       },
@@ -6075,6 +6081,7 @@
         "required": [
           "id",
           "status",
+          "kind",
           "fromUserId",
           "fromName",
           "toUserId",
@@ -6089,6 +6096,9 @@
           },
           "status": {
             "$ref": "#/components/schemas/TradeStatus"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/TradeKind"
           },
           "fromUserId": {
             "type": "string"
@@ -6149,6 +6159,18 @@
           3,
           4,
           5
+        ]
+      },
+      "TradeKind": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "TRADE",
+          "GIFT"
+        ],
+        "enum": [
+          0,
+          1
         ]
       },
       "TradePokemonSummaryDTO": {

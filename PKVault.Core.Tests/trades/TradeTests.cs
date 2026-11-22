@@ -202,6 +202,18 @@ public class TradeTests : IAsyncDisposable
         Assert.Contains("quero eevee", server.Bodies[ i ]);
         Assert.Contains("name=to", server.Bodies[ i ]);
         Assert.Contains("filename=pokemon.pk3", server.Bodies[ i ]);
+        Assert.Contains("TRADE", server.Bodies[ i ]);
+    }
+
+    [Fact]
+    public async Task Offer_AsGift_SendsGiftKind()
+    {
+        var (trades, _, server, _) = NewTrades();
+
+        var result = await trades.Offer(new("v1", "u2", null, Gift: true), TestContext.Current.CancellationToken);
+
+        Assert.True(result.Success, result.ErrorDetail);
+        Assert.Contains("GIFT", server.Bodies[ server.Requests.IndexOf("POST /api/pokehome/trades") ]);
     }
 
     [Fact]
@@ -337,6 +349,8 @@ public class TradeTests : IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
+    private ImmutablePKM? duplicateInSlot1;
+
     private async Task<(TradeReceivePkmAction action, PkmVariantLoader variants)> NewReceiveAction(int slotCount, int occupied)
     {
         var fs = new MockFileSystem(new Dictionary<string, MockFileData>(), Directory.GetCurrentDirectory());
@@ -373,7 +387,8 @@ public class TradeTests : IAsyncDisposable
         var box = (await boxes.GetDto("1"))!;
         for (var slot = 0; slot < occupied; slot++)
         {
-            await variants.AddEntity(new(box, slot, true, false, null, null, EntityContext.Gen3, 3, Pkm((uint)(1000 + slot))));
+            var pkm = slot == 1 && duplicateInSlot1 != null ? duplicateInSlot1 : Pkm((uint)(1000 + slot));
+            await variants.AddEntity(new(box, slot, true, false, null, null, EntityContext.Gen3, 3, pkm));
         }
 
         return (new TradeReceivePkmAction(variants, banks, boxes, new MainCreateBoxAction(boxes)), variants);
@@ -417,4 +432,30 @@ public class TradeTests : IAsyncDisposable
     }
 
     #endregion
+
+    [Fact]
+    public async Task PrepareOutgoing_CopyElsewhereInStorage_IsRefused()
+    {
+        // slot 0 and slot 1 hold the same pokémon (what "detach" or a copy leaves behind)
+        duplicateInSlot1 = Pkm(1000);
+        var (_, variants) = await NewReceiveAction(slotCount: 30, occupied: 3);
+        var local = LocalStorageOver(variants);
+        var first = (await variants.GetEntitiesByBox("1", 0)).Values.Single();
+        var other = (await variants.GetEntitiesByBox("1", 2)).Values.Single();
+
+        var ex = await Assert.ThrowsAsync<TradeException>(() => local.PrepareOutgoing(first.Id));
+        Assert.Equal(TradeError.DUPLICATE, ex.Error);
+
+        // a unique pokémon is fine
+        var outgoing = await local.PrepareOutgoing(other.Id);
+        Assert.Equal(other.Id, outgoing.VariantId);
+        Assert.Equal("pk3", outgoing.Upload.Format);
+    }
+
+    private static TradeLocalStorage LocalStorageOver(PkmVariantLoader variants)
+    {
+        var services = new ServiceCollection();
+        services.AddScoped<IPkmVariantLoader>(_ => variants);
+        return new TradeLocalStorage(services.BuildServiceProvider());
+    }
 }

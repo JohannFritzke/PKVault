@@ -48,6 +48,7 @@ public sealed class TradeService(
             var trades = tradesTask.Result.Select(t => new TradeDTO(
                 Id: t.Id,
                 Status: t.Status,
+                Kind: t.Kind,
                 FromUserId: t.From,
                 FromName: Name(t.From),
                 ToUserId: t.To,
@@ -117,7 +118,8 @@ public sealed class TradeService(
         Guarded(async (config, token) =>
         {
             var outgoing = await Local.PrepareOutgoing(request.PkmVariantId);
-            var trade = await client.CreateTradeOffer(config.ServerUrl, token, request.ToUserId, request.Message, outgoing.Upload, ct);
+            var kind = request.Gift ? TradeKind.GIFT : TradeKind.TRADE;
+            var trade = await client.CreateTradeOffer(config.ServerUrl, token, request.ToUserId, request.Message, kind, outgoing.Upload, ct);
             await RemoveOutgoing(config, token, outgoing, trade.Id, rollbackAction: "cancel", ct);
         }, ct);
 
@@ -320,6 +322,15 @@ public sealed class TradeLocalStorage(IServiceProvider sp) : ITradeLocalStorage
             throw new TradeException(TradeError.CANNOT_TRADE, "External pokémon cannot be traded");
         if (slotVariants.Any(v => v.AttachedSaveId != null))
             throw new TradeException(TradeError.CANNOT_TRADE, "Pokémon attached to a save: detach it first");
+
+        // the same pokémon somewhere else (a save after "detach", or another storage slot): trading it would duplicate it
+        var hashes = slotVariants.Select(v => v.Hash).Where(h => !string.IsNullOrEmpty(h)).ToHashSet();
+        var elsewhereInStorage = (await loader.GetAllEntities()).Values
+            .Any(v => hashes.Contains(v.Hash) && (v.BoxId != entity.BoxId || v.BoxSlot != entity.BoxSlot));
+        var inSave = sp.GetService<ISavesLoadersService>()?.GetAllLoaders()
+            .Any(save => hashes.Any(hash => !save.Pkms.GetDtosByIdBase(hash).IsEmpty)) ?? false;
+        if (elsewhereInStorage || inSave)
+            throw new TradeException(TradeError.DUPLICATE, "Another copy of this pokémon exists in a save or in the storage");
 
         var main = slotVariants.FirstOrDefault(v => v.IsMain) ?? entity;
         var pkm = await loader.GetPKM(main);

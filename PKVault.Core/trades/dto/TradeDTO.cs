@@ -13,6 +13,14 @@ public enum TradeStatus
     EXPIRED,
 }
 
+public enum TradeKind
+{
+    /// <summary>The friend must answer with a pokémon.</summary>
+    TRADE,
+    /// <summary>The friend accepts or declines, nothing is given back.</summary>
+    GIFT,
+}
+
 public enum TradeError
 {
     NOT_LOGGED_IN,
@@ -20,6 +28,8 @@ public enum TradeError
     PENDING_CHANGES,
     /// <summary>Pokémon attached to a save, external, egg or invalid.</summary>
     CANNOT_TRADE,
+    /// <summary>Another copy of this pokémon exists in a save or elsewhere in the storage (after "detach" for example).</summary>
+    DUPLICATE,
     NOT_FOUND,
     SERVER,
 }
@@ -34,6 +44,7 @@ public record TradePokemonSummaryDTO(
 public record TradeDTO(
     string Id,
     TradeStatus Status,
+    TradeKind Kind,
     string FromUserId,
     string FromName,
     string ToUserId,
@@ -63,7 +74,7 @@ public record TradesStatusDTO(
     string? ErrorDetail
 );
 
-public record TradeOfferRequestDTO(string PkmVariantId, string ToUserId, string? Message);
+public record TradeOfferRequestDTO(string PkmVariantId, string ToUserId, string? Message, bool Gift = false);
 
 public record TradeCounterRequestDTO(string PkmVariantId, string? Message);
 
