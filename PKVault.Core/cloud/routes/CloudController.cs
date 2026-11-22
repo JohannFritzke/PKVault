@@ -1,5 +1,6 @@
 using PKVault.Core.BackupProviders;
 using PKVault.Core.Cloud;
+using PKVault.Core.Trades;
 
 namespace PKVault.Core.cloud.routes;
 
@@ -7,7 +8,7 @@ namespace PKVault.Core.cloud.routes;
 /// api/cloud
 /// </summary>
 [Route("api/[controller]")]
-public class CloudController(CloudAuthService cloudAuthService, CloudSyncService cloudSyncService, BackupProviderDispatcher dispatcher)
+public class CloudController(CloudAuthService cloudAuthService, CloudSyncService cloudSyncService, BackupProviderDispatcher dispatcher, TradeService tradeService)
 {
     /// <summary>
     /// Also starts an automatic sync when the last one is older than CloudSyncService.Interval:
@@ -17,14 +18,14 @@ public class CloudController(CloudAuthService cloudAuthService, CloudSyncService
     public CloudStatusDTO Status()
     {
         cloudSyncService.Trigger();
-        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
+        return GetStatus();
     }
 
     [HttpPost("sync")]
     public CloudStatusDTO Sync()
     {
         cloudSyncService.Trigger(force: true);
-        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
+        return GetStatus();
     }
 
     /// <summary>
@@ -41,6 +42,9 @@ public class CloudController(CloudAuthService cloudAuthService, CloudSyncService
     public CloudStatusDTO Logout()
     {
         cloudAuthService.Logout();
-        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
+        return GetStatus();
     }
+
+    private CloudStatusDTO GetStatus() =>
+        cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus()) with { TradeClaimRevision = tradeService.ClaimRevision };
 }

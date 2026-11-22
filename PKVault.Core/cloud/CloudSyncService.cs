@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using PKVault.Core.BackupProviders;
+using PKVault.Core.Trades;
 using Serilog;
 
 namespace PKVault.Core.Cloud;
@@ -42,6 +43,8 @@ public sealed class CloudSyncService(
     /// <summary>Overridable for tests.</summary>
     public Func<byte[], Task<CloudBackupApplier.Result>> ApplyBackup { get; set; } = null!;
     public Func<Task> PushSnapshot { get; set; } = null!;
+    /// <summary>Runs after each successful sync, with the sync lock held. Default: store pokémon received by trade.</summary>
+    public Func<string, CancellationToken, Task>? AfterSync { get; set; }
 
     public static CloudSyncDecision Decide(CloudConfig config, PocketBaseBackupRecord? latest)
     {
@@ -135,6 +138,12 @@ public sealed class CloudSyncService(
                     break;
             }
 
+            // after a pull, so received pokémon go into the newest data
+            if (AfterSync != null)
+                await AfterSync(token, cts.Token);
+            else if (sp.GetService<TradeService>() is TradeService trades)
+                await trades.ClaimPending(token, cts.Token);
+
             lock (gate)
             {
                 state = CloudSyncState.IDLE;
@@ -152,6 +161,22 @@ public sealed class CloudSyncService(
                 error = ex is CloudSyncException syncEx ? syncEx.Error : CloudSyncError.SERVER;
                 errorDetail = ex.Message;
             }
+        }
+        finally
+        {
+            running.Release();
+        }
+    }
+
+    /// <summary>
+    /// Runs work that changes local data and the server (trades), never at the same time as a sync.
+    /// </summary>
+    public async Task<T> RunExclusive<T>(Func<Task<T>> work, CancellationToken ct)
+    {
+        await running.WaitAsync(ct);
+        try
+        {
+            return await work();
         }
         finally
         {

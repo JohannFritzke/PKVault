@@ -5,6 +5,7 @@ using Microsoft.Extensions.Primitives;
 using PKHeX.Core;
 using PKVault.Core.Cloud;
 using PKVault.Core.SaveDiscovery;
+using PKVault.Core.Trades;
 
 namespace PKVault.Core;
 
@@ -15,6 +16,11 @@ namespace PKVault.Core;
 [JsonSerializable(typeof(CloudStatusDTO))]
 [JsonSerializable(typeof(CloudLoginRequestDTO))]
 [JsonSerializable(typeof(CloudLoginStartDTO))]
+[JsonSerializable(typeof(TradesStatusDTO))]
+[JsonSerializable(typeof(TradeOfferRequestDTO))]
+[JsonSerializable(typeof(TradeCounterRequestDTO))]
+[JsonSerializable(typeof(TradeActionResultDTO))]
+[JsonSerializable(typeof(List<PokemonHistoryEntryDTO>))]
 [JsonSerializable(typeof(DirectoryContent))]
 [JsonSerializable(typeof(WarningsDTO))]
 [JsonSerializable(typeof(List<BankDTO>))]

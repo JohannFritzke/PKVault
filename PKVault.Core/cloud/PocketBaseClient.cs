@@ -24,7 +24,7 @@ public class PocketBaseException(HttpStatusCode status, string message) : Except
 /// Minimal PocketBase REST client (users auth + vault_backups).
 /// JSON is read with JsonDocument and written with Utf8JsonWriter: no reflection, safe with trimming.
 /// </summary>
-public class PocketBaseClient(HttpClient http)
+public partial class PocketBaseClient(HttpClient http)
 {
     public const string UsersCollection = "users";
     public const string BackupsCollection = "vault_backups";

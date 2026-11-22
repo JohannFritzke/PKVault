@@ -60,7 +60,9 @@ public record CloudStatusDTO(
     DateTime? LastPulledBackupAt,
     int LastPulledSavesSkipped,
     CloudSyncError? SyncError,
-    string? SyncErrorDetail
+    string? SyncErrorDetail,
+    /// <summary>Increased each time pokémon received by trade were stored here: the app refreshes its storage.</summary>
+    int TradeClaimRevision = 0
 );
 
 public record CloudLoginRequestDTO(string Provider);

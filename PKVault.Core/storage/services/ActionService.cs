@@ -263,6 +263,14 @@ public class ActionService(
         );
     }
 
+    // PKVault fork: lets fork features (trades/) queue their own actions
+    public async Task<DataUpdateFlags> AddForkAction<I>(Func<IServiceScope, DataAction<I>> getScopedAction, I input)
+    {
+        using var scope = sp.CreateScope();
+
+        return await AddAction(scope, getScopedAction, input);
+    }
+
     public async Task<DataUpdateFlags> Save()
     {
         var flags = new DataUpdateFlags();

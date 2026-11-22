@@ -6,6 +6,7 @@ using PKVault.Core.dex.routes;
 using PKVault.Core.saveinfos.routes;
 using PKVault.Core.BackupProviders;
 using PKVault.Core.Cloud;
+using PKVault.Core.Trades;
 using PKVault.Core.SaveDiscovery;
 using PKVault.Core.settings.routes;
 using PKVault.Core.storage.routes;
@@ -146,6 +147,7 @@ public class Program
         services.AddSaveDiscovery();
         services.AddBackupProviders();
         services.AddCloud();
+        services.AddTrades();
 
         Log.Information($"Setup services - Finished");
     }

@@ -22,10 +22,12 @@ public record CloudConfig
     public string? LastBackupRecordId { get; init; }
     /// <summary>Time of a local save whose snapshot is not on the server yet (offline, upload failed...).</summary>
     public DateTime? PendingLocalSaveAt { get; init; }
+    /// <summary>Trade pokémon already stored here, but not yet marked as claimed on the server (never store them twice).</summary>
+    public IReadOnlyList<string> StoredTradePokemonIds { get; init; } = [];
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(UserId);
 
-    public CloudConfig LoggedOut() => new() { ServerUrl = ServerUrl };
+    public CloudConfig LoggedOut() => new() { ServerUrl = ServerUrl, StoredTradePokemonIds = StoredTradePokemonIds };
 }
 
 public class CloudStore(IFileSystem fileSystem, string? filePath = null)
@@ -83,6 +85,9 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
                 PendingLocalSaveAt = DateTime.TryParse(Str("pendingLocalSaveAt"), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var pending)
                     ? pending.ToUniversalTime()
                     : null,
+                StoredTradePokemonIds = root.TryGetProperty("storedTradePokemonIds", out var stored) && stored.ValueKind == JsonValueKind.Array
+                    ? [.. stored.EnumerateArray().Where(v => v.ValueKind == JsonValueKind.String).Select(v => v.GetString()!)]
+                    : [],
             };
         }
         catch (Exception ex)
@@ -111,6 +116,13 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
             Opt("userEmail", config.UserEmail);
             Opt("lastBackupRecordId", config.LastBackupRecordId);
             Opt("pendingLocalSaveAt", config.PendingLocalSaveAt?.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
+            if (config.StoredTradePokemonIds.Count > 0)
+            {
+                writer.WriteStartArray("storedTradePokemonIds");
+                foreach (var id in config.StoredTradePokemonIds)
+                    writer.WriteStringValue(id);
+                writer.WriteEndArray();
+            }
             writer.WriteEndObject();
         }
 
