@@ -34,7 +34,7 @@ public sealed class CloudAuthService(
 
     public bool IsLoggedIn => store.Get().IsLoggedIn;
 
-    public CloudStatusDTO GetStatus(BackupProviderDispatcher? dispatcher)
+    public CloudStatusDTO GetStatus(BackupProviderDispatcher? dispatcher, CloudSyncService.CloudSyncStatus? sync = null)
     {
         var config = store.Get();
         var push = dispatcher?.GetStatus().Find(s => s.ProviderId == PocketBaseBackupProvider.ProviderId);
@@ -53,7 +53,15 @@ public sealed class CloudAuthService(
                 LoginErrorDetail: loginErrorDetail,
                 BackupState: config.IsLoggedIn ? push?.State : null,
                 LastBackupAt: config.IsLoggedIn ? push?.LastBackupCreatedAt : null,
-                BackupError: config.IsLoggedIn ? push?.LastError : null
+                BackupError: config.IsLoggedIn ? push?.LastError : null,
+                SyncState: sync?.State ?? CloudSyncState.IDLE,
+                LastSyncAt: sync?.LastSyncAt,
+                SyncRevision: sync?.Revision ?? 0,
+                LastPulledDevice: sync?.LastPulledDevice,
+                LastPulledBackupAt: sync?.LastPulledBackupAt,
+                LastPulledSavesSkipped: sync?.LastPulledSavesSkipped ?? 0,
+                SyncError: sync?.Error,
+                SyncErrorDetail: sync?.ErrorDetail
             );
         }
     }
@@ -148,10 +156,8 @@ public sealed class CloudAuthService(
             }
         }
 
-        // first snapshot right away, so the server has the current state without waiting for a save
-        var backupService = sp.GetService<BackupService>();
-        if (backupService != null)
-            await BackupProviderHook.AfterSave(sp, backupService);
+        // first sync right away: pulls the server copy when there is one, otherwise sends this computer's data
+        sp.GetService<CloudSyncService>()?.Trigger(force: true);
     }
 
     public void Logout()

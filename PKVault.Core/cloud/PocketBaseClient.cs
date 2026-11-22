@@ -11,6 +11,10 @@ public record PocketBaseOAuthProvider(string Name, string AuthUrl, string CodeVe
 
 public record PocketBaseOAuthResult(string? State, string? Code, string? Error);
 
+public record PocketBaseBackupRecord(
+    string Id, string CollectionId, DateTime Created, string Device, string File, string? Parent, string Sha256
+);
+
 public class PocketBaseException(HttpStatusCode status, string message) : Exception(message)
 {
     public HttpStatusCode Status { get; } = status;
@@ -149,6 +153,56 @@ public class PocketBaseClient(HttpClient http)
 
         var items = doc.RootElement.GetProperty("items");
         return items.GetArrayLength() > 0 ? items[ 0 ].GetProperty("id").GetString() : null;
+    }
+
+    /// <summary>Most recent backups of the user (rules restrict the list to the owner).</summary>
+    public async Task<List<PocketBaseBackupRecord>> ListBackups(string serverUrl, string token, int count, CancellationToken ct)
+    {
+        using var doc = await SendJson(HttpMethod.Get,
+            $"{serverUrl}/api/collections/{BackupsCollection}/records?perPage={count}&skipTotal=1&sort=-created"
+            + "&fields=id,collectionId,created,device,file,parent,sha256,appVersion", null, token, ct);
+
+        return [ .. doc.RootElement.GetProperty("items").EnumerateArray().Select(item =>
+        {
+            string? Str(string name) => item.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String && v.GetString() != "" ? v.GetString() : null;
+            return new PocketBaseBackupRecord(
+                Id: Str("id")!,
+                CollectionId: Str("collectionId") ?? BackupsCollection,
+                Created: ParseDate(Str("created")),
+                Device: Str("device") ?? "",
+                File: Str("file") ?? "",
+                Parent: Str("parent"),
+                Sha256: Str("sha256") ?? ""
+            );
+        }) ];
+    }
+
+    /// <summary>Downloads the zip of a backup record (protected file: needs a short-lived file token).</summary>
+    public async Task<byte[]> DownloadBackup(string serverUrl, string token, PocketBaseBackupRecord record, CancellationToken ct)
+    {
+        string fileToken;
+        using (var doc = await SendJson(HttpMethod.Post, $"{serverUrl}/api/files/token", null, token, ct))
+            fileToken = doc.RootElement.GetProperty("token").GetString()!;
+
+        using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeoutCts.CancelAfter(UploadTimeout);
+
+        var url = $"{serverUrl}/api/files/{Uri.EscapeDataString(record.CollectionId)}/{Uri.EscapeDataString(record.Id)}/{Uri.EscapeDataString(record.File)}"
+            + $"?token={Uri.EscapeDataString(fileToken)}";
+        using var response = await http.GetAsync(url, timeoutCts.Token);
+        if (!response.IsSuccessStatusCode)
+            throw new PocketBaseException(response.StatusCode, $"Server error {(int)response.StatusCode}: backup download failed");
+
+        return await response.Content.ReadAsByteArrayAsync(timeoutCts.Token);
+    }
+
+    /// <summary>PocketBase dates: "2026-11-21 23:34:47.309Z".</summary>
+    public static DateTime ParseDate(string? value)
+    {
+        return DateTime.TryParse(value?.Replace(' ', 'T'), System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal, out var date)
+            ? DateTime.SpecifyKind(date, DateTimeKind.Utc)
+            : DateTime.MinValue;
     }
 
     public async Task<bool> BackupExists(string serverUrl, string token, string recordId, CancellationToken ct)

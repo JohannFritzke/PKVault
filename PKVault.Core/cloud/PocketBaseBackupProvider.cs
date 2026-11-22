@@ -27,6 +27,10 @@ public class PocketBaseBackupProvider(CloudStore store, CloudAuthService auth, P
         var config = store.Get();
         var serverUrl = config.ServerUrl;
 
+        // remembered until the upload succeeds, so sync knows this computer has newer unsent data
+        if (config.PendingLocalSaveAt == null || config.PendingLocalSaveAt < artifact.CreatedAt)
+            config = store.Update(c => c with { PendingLocalSaveAt = artifact.CreatedAt });
+
         var existing = await client.FindBackupBySha256(serverUrl, token, artifact.Sha256, cancellationToken);
         if (existing != null)
         {
@@ -51,6 +55,6 @@ public class PocketBaseBackupProvider(CloudStore store, CloudAuthService auth, P
 
     private void RememberLast(string? userId, string recordId)
     {
-        store.Update(c => c.UserId == userId ? c with { LastBackupRecordId = recordId } : c);
+        store.Update(c => c.UserId == userId ? c with { LastBackupRecordId = recordId, PendingLocalSaveAt = null } : c);
     }
 }

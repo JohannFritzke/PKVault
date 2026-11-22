@@ -79,6 +79,9 @@ public sealed class BackupProviderDispatcher : IAsyncDisposable, IDisposable
         }
     }
 
+    /// <summary>No backup waiting or being pushed.</summary>
+    public bool IsIdle => Volatile.Read(ref pendingCount) == 0;
+
     public List<BackupProviderStatusDTO> GetStatus() => [ .. status.Values.OrderBy(s => s.ProviderId) ];
 
     /// <summary>Waits until every queued backup was handled (tests, app shutdown).</summary>

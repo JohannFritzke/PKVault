@@ -17,6 +17,7 @@ public static class CloudServiceCollectionExtensions
         // long-lived realtime stream: per-request timeouts are set inside the client
         services.AddSingleton(_ => new PocketBaseClient(new HttpClient { Timeout = Timeout.InfiniteTimeSpan }));
         services.AddSingleton<CloudAuthService>();
+        services.AddSingleton<CloudSyncService>();
         services.AddSingleton<IBackupProvider, PocketBaseBackupProvider>();
         services.AddScoped<CloudController>();
 

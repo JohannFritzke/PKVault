@@ -44,7 +44,8 @@ public static class BackupProviderHook
 
             dispatcher.Enqueue(new BackupArtifact(
                 Name: name,
-                CreatedAt: createdAt,
+                // BackupService uses TimeProvider.GetUtcNow().DateTime: UTC with an unspecified kind
+                CreatedAt: DateTime.SpecifyKind(createdAt, DateTimeKind.Utc),
                 Content: content,
                 Sha256: Convert.ToHexStringLower(SHA256.HashData(content))
             ));

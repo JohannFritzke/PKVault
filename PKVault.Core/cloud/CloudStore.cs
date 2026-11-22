@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Text;
 using System.Text.Json;
@@ -19,6 +20,8 @@ public record CloudConfig
     public string? UserEmail { get; init; }
     /// <summary>Last vault_backups record pushed from this computer: parent of the next one.</summary>
     public string? LastBackupRecordId { get; init; }
+    /// <summary>Time of a local save whose snapshot is not on the server yet (offline, upload failed...).</summary>
+    public DateTime? PendingLocalSaveAt { get; init; }
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(UserId);
 
@@ -77,6 +80,9 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
                 UserName = Str("userName"),
                 UserEmail = Str("userEmail"),
                 LastBackupRecordId = Str("lastBackupRecordId"),
+                PendingLocalSaveAt = DateTime.TryParse(Str("pendingLocalSaveAt"), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var pending)
+                    ? pending.ToUniversalTime()
+                    : null,
             };
         }
         catch (Exception ex)
@@ -104,6 +110,7 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
             Opt("userName", config.UserName);
             Opt("userEmail", config.UserEmail);
             Opt("lastBackupRecordId", config.LastBackupRecordId);
+            Opt("pendingLocalSaveAt", config.PendingLocalSaveAt?.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
             writer.WriteEndObject();
         }
 

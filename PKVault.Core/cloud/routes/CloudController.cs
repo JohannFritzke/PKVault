@@ -7,12 +7,24 @@ namespace PKVault.Core.cloud.routes;
 /// api/cloud
 /// </summary>
 [Route("api/[controller]")]
-public class CloudController(CloudAuthService cloudAuthService, BackupProviderDispatcher dispatcher)
+public class CloudController(CloudAuthService cloudAuthService, CloudSyncService cloudSyncService, BackupProviderDispatcher dispatcher)
 {
+    /// <summary>
+    /// Also starts an automatic sync when the last one is older than CloudSyncService.Interval:
+    /// the app polls this route, so sync happens at startup and regularly while it is open.
+    /// </summary>
     [HttpGet("status")]
     public CloudStatusDTO Status()
     {
-        return cloudAuthService.GetStatus(dispatcher);
+        cloudSyncService.Trigger();
+        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
+    }
+
+    [HttpPost("sync")]
+    public CloudStatusDTO Sync()
+    {
+        cloudSyncService.Trigger(force: true);
+        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
     }
 
     /// <summary>
@@ -29,6 +41,6 @@ public class CloudController(CloudAuthService cloudAuthService, BackupProviderDi
     public CloudStatusDTO Logout()
     {
         cloudAuthService.Logout();
-        return cloudAuthService.GetStatus(dispatcher);
+        return cloudAuthService.GetStatus(dispatcher, cloudSyncService.GetStatus());
     }
 }
