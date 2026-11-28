@@ -12,6 +12,7 @@
 // Open trades expire after 3 days (cron below).
 
 routerAdd("POST", "/api/pokehome/trades", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const lib = require(`${__hooks}/trades_lib.js`);
     const me = e.auth.id;
     const body = e.requestInfo().body;
@@ -24,9 +25,11 @@ routerAdd("POST", "/api/pokehome/trades", (e) => {
     if (!to || to === me) {
         throw new BadRequestError("Choose a friend to trade with.");
     }
+    let toUser = null;
     try {
-        e.app.findRecordById("users", to);
-    } catch (_) {
+        toUser = e.app.findRecordById("users", to);
+    } catch (_) { }
+    if (!toUser || toUser.getString("status") !== "APPROVED") {
         throw new BadRequestError("This user does not exist.");
     }
 
@@ -59,6 +62,7 @@ routerAdd("POST", "/api/pokehome/trades", (e) => {
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/pokehome/trades/{id}/counter", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const lib = require(`${__hooks}/trades_lib.js`);
     const me = e.auth.id;
     const body = e.requestInfo().body;
@@ -91,6 +95,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/counter", (e) => {
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/pokehome/trades/{id}/accept", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const lib = require(`${__hooks}/trades_lib.js`);
     const me = e.auth.id;
 
@@ -131,6 +136,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/accept", (e) => {
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/pokehome/trades/{id}/decline", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const lib = require(`${__hooks}/trades_lib.js`);
     const me = e.auth.id;
 
@@ -150,6 +156,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/decline", (e) => {
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/pokehome/trades/{id}/cancel", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const lib = require(`${__hooks}/trades_lib.js`);
     const me = e.auth.id;
 
@@ -167,6 +174,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/cancel", (e) => {
 }, $apis.requireAuth("users"));
 
 routerAdd("POST", "/api/pokehome/pokemon/{id}/claimed", (e) => {
+    require(`${__hooks}/trades_lib.js`).requireApproved(e);
     const me = e.auth.id;
     const id = e.request.pathValue("id");
 

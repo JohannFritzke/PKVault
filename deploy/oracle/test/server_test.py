@@ -50,15 +50,50 @@ def check(name, cond, detail=""):
 st, r = req("POST", "/api/collections/_superusers/auth-with-password", body={"identity": "admin@test.local", "password": "TestAdmin12345"})
 admin = r["token"]
 
-def make_user(name):
+def make_user(name, status="APPROVED"):
+    """Users log in only with OAuth2: the test creates them as superuser and takes a token by impersonation."""
     email = f"{name.lower()}@test.local"
-    req("POST", "/api/collections/users/records", admin, {"email": email, "password": "Passw0rd!123", "passwordConfirm": "Passw0rd!123", "name": name})
-    st, r = req("POST", "/api/collections/users/auth-with-password", body={"identity": email, "password": "Passw0rd!123"})
-    return r["token"], r["record"]["id"]
+    body = {"email": email, "password": "Passw0rd!123", "passwordConfirm": "Passw0rd!123", "name": name}
+    if status is not None:
+        body["status"] = status
+    st, r = req("POST", "/api/collections/users/records", admin, body)
+    user_id = r["id"]
+    st, r = req("POST", f"/api/collections/users/impersonate/{user_id}", admin, {"duration": 3600})
+    return r["token"], user_id
 
 A, a_id = make_user("Ash")
 B, b_id = make_user("Brock")
 C, c_id = make_user("Misty")
+P, p_id = make_user("Pending", status=None)   # created without status: starts PENDING
+
+# --- approval
+st, r = req("GET", f"/api/collections/users/records/{p_id}", admin)
+check("approval: a new account starts PENDING", r.get("status") == "PENDING", r)
+st, r = req("GET", f"/api/collections/users/records/{p_id}", P)
+check("approval: a pending user sees its own status", st == 200 and r["status"] == "PENDING", (st, r))
+st, r = req("GET", "/api/collections/users/records", P)
+check("approval: a pending user sees nobody else", st == 200 and [u["id"] for u in r["items"]] == [p_id], (st, r))
+st, r = req("GET", "/api/collections/users/records", A)
+check("approval: approved users do not see pending ones", st == 200 and p_id not in {u["id"] for u in r["items"]}, r)
+st, r = req("PATCH", f"/api/collections/users/records/{p_id}", P, {"status": "APPROVED"})
+check("approval: a user cannot approve itself", st in (403, 404), (st, r))
+st, r = req("GET", f"/api/collections/users/records/{p_id}", admin)
+check("approval: status unchanged after the attempt", r.get("status") == "PENDING", r)
+st, r = req("POST", "/api/collections/users/records", None, {"email": "intruder@test.local", "password": "Passw0rd!123", "passwordConfirm": "Passw0rd!123"})
+check("approval: anonymous account creation refused", st in (400, 403), (st, r))
+st, r = req("POST", "/api/collections/users/records", P, {"email": "intruder2@test.local", "password": "Passw0rd!123", "passwordConfirm": "Passw0rd!123", "status": "APPROVED"})
+check("approval: a user cannot create accounts", st in (400, 403), (st, r))
+st, r = req("POST", "/api/collections/users/auth-with-password", body={"identity": "ash@test.local", "password": "Passw0rd!123"})
+check("approval: email + password login is off for users", st in (400, 403), (st, r))
+st, r = req("DELETE", f"/api/collections/users/records/{a_id}", A)
+check("approval: a user cannot delete its account", st in (403, 404), (st, r))
+buf = io.BytesIO()
+with zipfile.ZipFile(buf, "w") as z:
+    z.writestr("n.txt", "pending")
+st, r = req("POST", "/api/collections/vault_backups/records", P, {"owner": p_id, "sha256": hashlib.sha256(buf.getvalue()).hexdigest(), "device": "PC"}, {"file": ("p.zip", buf.getvalue())})
+check("approval: a pending user cannot upload backups", st in (400, 403), (st, r))
+st, r = req("GET", "/api/settings", admin)
+check("approval: rate limiter on", st == 200 and r["rateLimits"]["enabled"] is True and len(r["rateLimits"]["rules"]) > 0, (st, r.get("rateLimits") if isinstance(r, dict) else r))
 
 st, r = req("GET", "/api/collections/users/records", A)
 check("users: a user can list friends", st == 200 and {u["id"] for u in r["items"]} >= {b_id, c_id}, (st, r))
@@ -85,6 +120,10 @@ st, r = req("POST", "/api/pokehome/trades", A, {**pk("x"), "to": b_id})
 check("offer: without file refused", st == 400, (st, r))
 st, r = req("POST", "/api/collections/trades/records", A, {"from": a_id, "to": b_id, "status": "DONE"})
 check("records API: direct trade creation refused", st in (400, 403), (st, r))
+st, r = offer(P, a_id, fp="fp-pending")
+check("approval: a pending user cannot offer", st == 403, (st, r))
+st, r = offer(A, p_id, fp="fp-to-pending")
+check("approval: cannot offer to a pending user", st == 400, (st, r))
 
 # --- exchange: offer -> counter -> accept
 st, t = offer(A, b_id)
@@ -204,6 +243,7 @@ for i in range(32):
     st, r = req("POST", "/api/collections/vault_backups/records", A, {"owner": a_id, "sha256": sha, "device": "PC"}, {"file": (f"b{i}.zip", data)})
     if st != 200:
         check("prune: upload", False, (i, st, r)); break
+    time.sleep(0.3)   # stay under the rate limiter (create: 20 per 5 s)
 st, r = req("GET", "/api/collections/vault_backups/records?perPage=50", A)
 check("prune: 30 newest kept", r["totalItems"] == 30, r["totalItems"])
 

@@ -121,7 +121,15 @@ function findTradeForUpdate(txApp, e) {
     }
 }
 
+// trades are only for accounts approved by the server owner
+function requireApproved(e) {
+    if (!e.auth || e.auth.getString("status") !== "APPROVED") {
+        throw new ForbiddenError("Your account is waiting for approval.");
+    }
+}
+
 module.exports = {
+    requireApproved,
     EXPIRES_DAYS,
     MAX_OPEN_TRADES_PER_USER,
     dateFromNow,
