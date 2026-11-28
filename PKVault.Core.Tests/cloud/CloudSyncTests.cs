@@ -203,7 +203,7 @@ public class CloudSyncTests
         var sp = services.BuildServiceProvider();
 
         var client = new PocketBaseClient(new HttpClient(server));
-        var auth = new CloudAuthService(store, client, sp, TimeProvider.System);
+        var auth = new CloudAuthService(store, client, sp, TimeProvider.System) { RefreshOnStart = false };
         return (new CloudSyncService(store, auth, client, sp, TimeProvider.System), store, server, session);
     }
 

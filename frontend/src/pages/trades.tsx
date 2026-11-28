@@ -4,6 +4,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowLeftRightIcon, CheckIcon, GiftIcon, InfoIcon, PackageOpenIcon, PlusIcon, RefreshCwIcon, TriangleAlertIcon, XIcon } from 'lucide-react';
 import React from 'react';
 import { CloudApprovalNotice } from '../cloud/cloud-approval-notice';
+import { CloudSessionExpiredNotice } from '../cloud/cloud-session-expired-notice';
 import { useCloudStatus } from '../data/sdk/cloud/cloud.gen';
 import { CloudAccountStatus, TradeError, TradeKind, TradeStatus, type TradeActionResultDTO, type TradeDTO } from '../data/sdk/model';
 import { useTradeAccept, useTradeCancel, useTradeDecline, useTradeStatus } from '../data/sdk/trade/trade.gen';
@@ -199,7 +200,9 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                 </UIButton>}
             />
 
-            {status && !status.loggedIn && <Alert variant='outline' icon={<InfoIcon />}>
+            {status?.sessionExpired && <CloudSessionExpiredNotice />}
+
+            {status && !status.loggedIn && !status.sessionExpired && <Alert variant='outline' icon={<InfoIcon />}>
                 {t('trades.logged-out')}{' '}
                 <Anchor renderRoot={props => <Link {...props} to='/settings' search={{ subMenu: 'cloud' }} />}>{t('trades.logged-out.link')}</Anchor>
             </Alert>}

@@ -52,6 +52,8 @@ public enum CloudSyncError
 public record CloudStatusDTO(
     string ServerUrl,
     bool LoggedIn,
+    /// <summary>Not logged in because the server refused the saved session: the app asks to log in again.</summary>
+    bool SessionExpired,
     string? Provider,
     string? UserName,
     string? UserEmail,

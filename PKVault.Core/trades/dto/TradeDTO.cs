@@ -79,7 +79,9 @@ public record TradesStatusDTO(
     /// <summary>Increases every time received pokémon are stored: the app reloads its storage.</summary>
     int ClaimRevision,
     TradeError? Error,
-    string? ErrorDetail
+    string? ErrorDetail,
+    /// <summary>Not logged in because the server refused the saved session: log in again.</summary>
+    bool SessionExpired = false
 );
 
 public record TradeOfferRequestDTO(string PkmVariantId, string ToUserId, string? Message, bool Gift = false);

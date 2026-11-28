@@ -42,6 +42,24 @@ Se o job falhar com **"Out of host capacity"**, vá em **Edit stack**, troque **
 ssh -i "$env:USERPROFILE\.ssh\pokehome" ubuntu@<public_ip>
 ```
 
+## Sessões do app (login)
+
+- O login de cada pessoa dura **30 dias** (migração `1795700000_users_token_30_days.js`).
+- O app renova o login quando abre e uma vez por dia enquanto está aberto. Só quem fica mais de 30 dias sem abrir o app precisa entrar de novo. Nesse caso, o app mostra "Sua sessão na nuvem expirou" com o botão "Entrar de novo".
+
+### Deslogar todo mundo de uma vez
+
+Use isso se achar que um login vazou.
+
+1. Abra o painel admin do PocketBase (`https://<seu-dominio>/_/`).
+2. Vá em **Collections → users → ⚙ (editar a collection) → Options**.
+3. Em **Auth token**, use **"Invalidate all previously issued tokens"** (gera um novo segredo).
+4. Salve.
+
+Todos os apps passam a mostrar "Sua sessão na nuvem expirou". Cada pessoa entra de novo com a mesma conta e continua de onde parou.
+
+Para barrar **uma** pessoa só, mude o `status` dela para `BLOCKED` em **Collections → users**.
+
 ## Apagar tudo
 
 No stack, rode **Destroy**. Isso apaga a VM e a rede.

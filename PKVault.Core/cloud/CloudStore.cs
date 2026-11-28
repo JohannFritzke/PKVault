@@ -26,12 +26,20 @@ public record CloudConfig
     public IReadOnlyList<string> StoredTradePokemonIds { get; init; } = [];
     /// <summary>Last known approval status of the account (checked at each sync).</summary>
     public CloudAccountStatus AccountStatus { get; init; } = CloudAccountStatus.APPROVED;
+    /// <summary>The server refused the saved session (too long without opening the app, or everyone logged out): log in again.</summary>
+    public bool SessionExpired { get; init; }
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(UserId);
 
     public bool IsApproved => IsLoggedIn && AccountStatus == CloudAccountStatus.APPROVED;
 
     public CloudConfig LoggedOut() => new() { ServerUrl = ServerUrl, StoredTradePokemonIds = StoredTradePokemonIds };
+
+    /// <summary>
+    /// Session refused by the server: only the token goes. The account stays known, so the app can say
+    /// "log in again" and, with the same account, continue the backup chain and pending saves.
+    /// </summary>
+    public CloudConfig Expired() => this with { Token = null, SessionExpired = true };
 }
 
 public class CloudStore(IFileSystem fileSystem, string? filePath = null)
@@ -90,6 +98,7 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
                     ? pending.ToUniversalTime()
                     : null,
                 AccountStatus = PocketBaseClient.ParseAccountStatus(Str("accountStatus")),
+                SessionExpired = root.TryGetProperty("sessionExpired", out var expired) && expired.ValueKind == JsonValueKind.True,
                 StoredTradePokemonIds = root.TryGetProperty("storedTradePokemonIds", out var stored) && stored.ValueKind == JsonValueKind.Array
                     ? [.. stored.EnumerateArray().Where(v => v.ValueKind == JsonValueKind.String).Select(v => v.GetString()!)]
                     : [],
@@ -122,6 +131,8 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
             Opt("lastBackupRecordId", config.LastBackupRecordId);
             if (config.AccountStatus != CloudAccountStatus.APPROVED)
                 writer.WriteString("accountStatus", config.AccountStatus.ToString());
+            if (config.SessionExpired)
+                writer.WriteBoolean("sessionExpired", true);
             Opt("pendingLocalSaveAt", config.PendingLocalSaveAt?.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
             if (config.StoredTradePokemonIds.Count > 0)
             {

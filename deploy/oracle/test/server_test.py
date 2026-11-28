@@ -111,6 +111,10 @@ EEVEE = b"PK3-EEVEE-BYTES"
 def offer(token, to, fp="fp-pika", content=PIKA, message="quero um eevee", kind="TRADE"):
     return req("POST", "/api/pokehome/trades", token, {**pk(fp), "to": to, "message": message, "kind": kind}, {"file": ("pika.pk3", content)})
 
+# --- login session
+st, r = req("GET", "/api/collections/users", admin)
+check("session: user tokens last 30 days", st == 200 and r["authToken"]["duration"] == 30 * 24 * 60 * 60, (st, r.get("authToken") if isinstance(r, dict) else r))
+
 # --- validation
 st, r = req("POST", "/api/pokehome/trades", None, {**pk("x"), "to": b_id}, {"file": ("x.pk3", b"x")})
 check("offer: anonymous refused", st == 401, (st, r))

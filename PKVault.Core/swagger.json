@@ -4768,6 +4768,7 @@
         "required": [
           "serverUrl",
           "loggedIn",
+          "sessionExpired",
           "loginState",
           "syncState",
           "syncRevision",
@@ -4779,6 +4780,9 @@
             "type": "string"
           },
           "loggedIn": {
+            "type": "boolean"
+          },
+          "sessionExpired": {
             "type": "boolean"
           },
           "provider": {
@@ -6216,7 +6220,8 @@
           "trades",
           "friends",
           "toClaimCount",
-          "claimRevision"
+          "claimRevision",
+          "sessionExpired"
         ],
         "properties": {
           "loggedIn": {
@@ -6250,6 +6255,9 @@
           },
           "errorDetail": {
             "type": "string"
+          },
+          "sessionExpired": {
+            "type": "boolean"
           }
         }
       },

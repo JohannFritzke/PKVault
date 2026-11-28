@@ -3,6 +3,8 @@ import { CloudUploadIcon, LogInIcon, LogOutIcon, RefreshCwIcon, ServerIcon, User
 import React from 'react';
 import { useCloudLogin, useCloudLogout, useCloudStatus, useCloudSync } from '../../data/sdk/cloud/cloud.gen';
 import { CloudApprovalNotice } from '../../cloud/cloud-approval-notice';
+import { cloudProviderLabel } from '../../cloud/cloud-provider-label';
+import { CloudSessionExpiredNotice } from '../../cloud/cloud-session-expired-notice';
 import { BackupProviderPushState, CloudAccountStatus, CloudLoginError, CloudLoginState, CloudSyncError, CloudSyncState, type CloudStatusDTO } from '../../data/sdk/model';
 import { useTranslate } from '../../translate/i18n';
 import { UIButton } from '../../ui/form/button/ui-button';
@@ -13,7 +15,7 @@ import { renderDate, renderTime } from '../../util/render-date-time';
 
 const providers = [ 'google', 'github' ] as const;
 
-const providerLabel = (provider?: string) => provider === 'github' ? 'GitHub' : provider === 'google' ? 'Google' : provider ?? '';
+const providerLabel = cloudProviderLabel;
 
 const isBusy = (status?: CloudStatusDTO) => status?.loginState === CloudLoginState.WAITING_BROWSER
     || status?.backupState === BackupProviderPushState.PENDING
@@ -66,7 +68,11 @@ export const SettingsCloudAccount: React.FC = () => {
 
     const waiting = status.loginState === CloudLoginState.WAITING_BROWSER;
 
-    const loginErrorText = status.loginState === CloudLoginState.ERROR && status.loginError !== undefined
+    // expired: the account is still known, "Log in again" (same provider) replaces the login section
+    const expired = !status.loggedIn && status.sessionExpired && !!status.provider;
+    const known = status.loggedIn || expired;
+
+    const loginErrorText = status.loginState === CloudLoginState.ERROR && status.loginError !== undefined && !expired
         ? {
             [ CloudLoginError.TIMEOUT ]: t('cloud.login.error.timeout'),
             [ CloudLoginError.DENIED ]: t('cloud.login.error.denied'),
@@ -131,7 +137,7 @@ export const SettingsCloudAccount: React.FC = () => {
         <UISettingsSection
             title={t('cloud.account.title')}
             description={t('cloud.account.description')}
-            actions={status.loggedIn && <UIButton
+            actions={known && <UIButton
                 name='cloud-logout'
                 controlLabel={t('cloud.logout')}
                 onClick={logout}
@@ -143,14 +149,16 @@ export const SettingsCloudAccount: React.FC = () => {
         >
             <UISettingsRow icon={<UserRoundIcon />}
                 label={t('cloud.account.label')}
-                description={status.loggedIn
+                description={known
                     ? [ status.userName, status.userEmail ].filter(Boolean).join(' · ') || '-'
                     : t('cloud.account.logged-out')}
             >
-                {status.loggedIn && status.provider && <Badge variant='default'>
+                {known && status.provider && <Badge variant='default'>
                     {t('cloud.account.via', { provider: providerLabel(status.provider) })}
                 </Badge>}
             </UISettingsRow>
+
+            {expired && <CloudSessionExpiredNotice />}
 
             {status.loggedIn && status.accountStatus !== undefined && status.accountStatus !== CloudAccountStatus.APPROVED
                 && <CloudApprovalNotice accountStatus={status.accountStatus} />}
@@ -182,7 +190,7 @@ export const SettingsCloudAccount: React.FC = () => {
             />
         </UISettingsSection>
 
-        {!status.loggedIn && <UISettingsSection
+        {!known && <UISettingsSection
             title={t('cloud.login.title')}
             description={t('cloud.login.same-provider')}
             padded

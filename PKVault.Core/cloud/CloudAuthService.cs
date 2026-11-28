@@ -21,6 +21,11 @@ public sealed class CloudAuthService(
     public static readonly string[] Providers = [ "google", "github" ];
     public static readonly TimeSpan LoginTimeout = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan RefreshBefore = TimeSpan.FromDays(2);
+    /// <summary>Each refresh gives a new token (30 days on the server): an app used now and then never gets logged out.</summary>
+    public static readonly TimeSpan RefreshEvery = TimeSpan.FromDays(1);
+
+    /// <summary>Last successful refresh (or login) in this run. Null: not yet, refresh at first use.</summary>
+    private DateTimeOffset? lastRefreshAt;
 
     private readonly Lock gate = new();
     private CancellationTokenSource? loginCts;
@@ -31,6 +36,9 @@ public sealed class CloudAuthService(
 
     /// <summary>Overridable for tests.</summary>
     public Func<string, bool> OpenBrowser { get; set; } = TryOpenBrowser;
+
+    /// <summary>Refresh the token the first time it is used after the app starts. Overridable for tests.</summary>
+    public bool RefreshOnStart { get; set; } = true;
 
     public bool IsLoggedIn => store.Get().IsLoggedIn;
 
@@ -59,6 +67,7 @@ public sealed class CloudAuthService(
             return new(
                 ServerUrl: config.ServerUrl,
                 LoggedIn: config.IsLoggedIn,
+                SessionExpired: config.SessionExpired,
                 Provider: config.Provider,
                 UserName: config.UserName,
                 UserEmail: config.UserEmail,
@@ -151,6 +160,7 @@ public sealed class CloudAuthService(
                     store.Update(config => SaveAuth(config, auth) with { Provider = oauth.Name });
                     SetLogin(CloudLoginState.IDLE, null, null, null);
                     loginCts = null;
+                    lastRefreshAt = timeProvider.GetUtcNow();
                 }
                 Log.Information($"Cloud: logged in with {oauth.Name} as {auth.UserId}");
             }
@@ -188,32 +198,48 @@ public sealed class CloudAuthService(
         Log.Information("Cloud: logged out");
     }
 
-    /// <summary>Current token, refreshed when it expires soon. Null when logged out or the session is no longer valid.</summary>
+    /// <summary>
+    /// Current token. It is refreshed when the app starts, once a day, and when it expires soon.
+    /// Null when logged out or when the server refused the session (then <see cref="CloudConfig.SessionExpired"/>).
+    /// </summary>
     public async Task<string?> GetValidToken(CancellationToken ct)
     {
         var config = store.Get();
         if (!config.IsLoggedIn)
             return null;
 
+        var now = timeProvider.GetUtcNow();
         var expiresAt = GetTokenExpiration(config.Token!);
-        if (expiresAt != null && expiresAt - timeProvider.GetUtcNow() > RefreshBefore)
+        var expiresSoon = expiresAt == null || expiresAt - now <= RefreshBefore;
+        var refreshDue = lastRefreshAt is { } last
+            ? now - last >= RefreshEvery
+            : RefreshOnStart;
+
+        if (!expiresSoon && !refreshDue)
             return config.Token;
 
         try
         {
             var auth = await client.AuthRefresh(config.ServerUrl, config.Token!, ct);
             var next = store.Update(c => c.UserId == config.UserId ? SaveAuth(c, auth) : c);
+            lastRefreshAt = now;
             return next.Token;
         }
         catch (PocketBaseException ex) when (ex.Status is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden or HttpStatusCode.NotFound)
         {
-            Log.Warning($"Cloud: session refused by the server ({(int)ex.Status}), logging out");
+            Log.Warning($"Cloud: session refused by the server ({(int)ex.Status}), log in again");
             lock (gate)
             {
-                store.Update(c => c.LoggedOut());
+                store.Update(c => c.UserId == config.UserId ? c.Expired() : c);
                 SetLogin(CloudLoginState.ERROR, config.Provider, CloudLoginError.EXPIRED, null);
             }
             return null;
+        }
+        catch (Exception ex) when (!expiresSoon && ex is not OperationCanceledException)
+        {
+            // offline or server down: the current token is still good for days, try again on the next use
+            Log.Warning($"Cloud: token refresh failed, keeping the current one ({ex.Message})");
+            return config.Token;
         }
     }
 
@@ -247,6 +273,7 @@ public sealed class CloudAuthService(
         UserName = auth.Name ?? (config.UserId == auth.UserId ? config.UserName : null),
         UserEmail = auth.Email ?? (config.UserId == auth.UserId ? config.UserEmail : null),
         AccountStatus = auth.Status,
+        SessionExpired = false,
         // the chain of backups belongs to one account
         LastBackupRecordId = config.UserId == auth.UserId ? config.LastBackupRecordId : null,
     };

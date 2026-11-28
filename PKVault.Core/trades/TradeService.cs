@@ -28,7 +28,7 @@ public sealed class TradeService(
     {
         var config = store.Get();
         if (!config.IsLoggedIn)
-            return new(false, null, [], [], 0, ClaimRevision, null, null);
+            return new(false, null, [], [], 0, ClaimRevision, null, null, SessionExpired: config.SessionExpired);
         if (!config.IsApproved)
             return new(true, config.UserId, [], [], 0, ClaimRevision, TradeError.NOT_APPROVED, null);
 
@@ -36,7 +36,7 @@ public sealed class TradeService(
         {
             var token = await auth.GetValidToken(ct);
             if (token == null)
-                return new(false, null, [], [], 0, ClaimRevision, TradeError.NOT_LOGGED_IN, null);
+                return new(false, null, [], [], 0, ClaimRevision, TradeError.NOT_LOGGED_IN, null, SessionExpired: store.Get().SessionExpired);
 
             var usersTask = client.ListUsers(config.ServerUrl, token, ct);
             var tradesTask = client.ListTrades(config.ServerUrl, token, ct);

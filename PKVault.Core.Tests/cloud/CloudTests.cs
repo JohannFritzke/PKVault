@@ -242,6 +242,80 @@ public class CloudTests
         Assert.Null(await auth.GetValidToken(CancellationToken.None));
         Assert.False(store.Get().IsLoggedIn);
         Assert.Equal(CloudLoginError.EXPIRED, auth.GetStatus(null).LoginError);
+
+        // the account stays known: the app asks to log in again, and the same account continues where it was
+        var status = auth.GetStatus(null);
+        Assert.True(status.SessionExpired);
+        Assert.Equal("Ash", status.UserName);
+        Assert.Equal("google", status.Provider);
+        Assert.Equal("u1", store.Get().UserId);
+    }
+
+    private sealed class ManualTime(DateTimeOffset now) : TimeProvider
+    {
+        public DateTimeOffset Now { get; set; } = now;
+        public override DateTimeOffset GetUtcNow() => Now;
+    }
+
+    [Fact]
+    public async Task GetValidToken_RefreshesOnStart_ThenOnceADay()
+    {
+        var time = new ManualTime(DateTimeOffset.UtcNow);
+        var token = Jwt(time.Now.AddDays(30));
+
+        var handler = new FakePocketBase();
+        handler.Route = (req, _) => req.RequestUri!.AbsolutePath == "/api/collections/users/auth-refresh"
+            ? FakePocketBase.Json($$$"""{"token":"{{{token}}}","record":{"id":"u1"}}""")
+            : null;
+
+        var store = LoggedInStore(token);
+        using var auth = new CloudAuthService(store, new PocketBaseClient(new HttpClient(handler)), new ServiceCollection().BuildServiceProvider(), time);
+
+        // the token is good for 30 days, it is still refreshed once when the app starts
+        Assert.Equal(token, await auth.GetValidToken(CancellationToken.None));
+        Assert.Single(handler.Requests);
+
+        time.Now = time.Now.AddHours(23);
+        await auth.GetValidToken(CancellationToken.None);
+        Assert.Single(handler.Requests);
+
+        time.Now = time.Now.AddHours(1);
+        await auth.GetValidToken(CancellationToken.None);
+        Assert.Equal(2, handler.Requests.Count);
+    }
+
+    [Fact]
+    public async Task GetValidToken_RefreshFailsOffline_KeepsTheStillValidToken()
+    {
+        var token = Jwt(DateTimeOffset.UtcNow.AddDays(20));
+        var handler = new FakePocketBase();
+        handler.Route = (_, _) => FakePocketBase.Json("""{"message":"bad gateway"}""", HttpStatusCode.BadGateway);
+
+        var store = LoggedInStore(token);
+        using var auth = new CloudAuthService(store, new PocketBaseClient(new HttpClient(handler)), new ServiceCollection().BuildServiceProvider(), TimeProvider.System);
+
+        Assert.Equal(token, await auth.GetValidToken(CancellationToken.None));
+        Assert.True(store.Get().IsLoggedIn);
+        Assert.False(store.Get().SessionExpired);
+    }
+
+    [Fact]
+    public void Store_KeepsSessionExpired_AndLogoutForgetsTheAccount()
+    {
+        var (store, fs) = NewStore();
+        store.Update(c => c with { ServerUrl = Server, Token = "t", UserId = "u1", UserName = "Ash", Provider = "google" });
+        store.Update(c => c.Expired());
+
+        var reread = new CloudStore(fs, StorePath).Get();
+        Assert.True(reread.SessionExpired);
+        Assert.False(reread.IsLoggedIn);
+        Assert.Equal("Ash", reread.UserName);
+
+        using var auth = new CloudAuthService(store, new PocketBaseClient(new HttpClient(new FakePocketBase())), new ServiceCollection().BuildServiceProvider(), TimeProvider.System);
+        auth.Logout();
+        Assert.False(store.Get().SessionExpired);
+        Assert.Null(store.Get().UserName);
+        Assert.False(new CloudStore(fs, StorePath).Get().SessionExpired);
     }
 
     private static (PocketBaseBackupProvider provider, FakePocketBase handler, CloudStore store) NewProvider(string? lastBackup, bool shaExists, bool parentExists = true)
@@ -260,7 +334,7 @@ public class CloudTests
 
         var store = LoggedInStore(token, lastBackup);
         var client = new PocketBaseClient(new HttpClient(handler));
-        var auth = new CloudAuthService(store, client, new ServiceCollection().BuildServiceProvider(), TimeProvider.System);
+        var auth = new CloudAuthService(store, client, new ServiceCollection().BuildServiceProvider(), TimeProvider.System) { RefreshOnStart = false };
         return (new PocketBaseBackupProvider(store, auth, client) { Device = "PC-TEST", AppVersion = "9.9.9" }, handler, store);
     }
 

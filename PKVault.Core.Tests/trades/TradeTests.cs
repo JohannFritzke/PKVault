@@ -151,7 +151,7 @@ public class TradeTests : IAsyncDisposable
 
         var sp = new ServiceCollection().BuildServiceProvider();
         var client = new PocketBaseClient(new HttpClient(server));
-        var auth = new CloudAuthService(store, client, sp, TimeProvider.System);
+        var auth = new CloudAuthService(store, client, sp, TimeProvider.System) { RefreshOnStart = false };
         var sync = new CloudSyncService(store, auth, client, sp, TimeProvider.System);
         var local = new FakeLocalStorage();
         return (new TradeService(store, auth, client, sync, sp) { LocalStorage = local }, store, server, local);
