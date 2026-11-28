@@ -179,11 +179,12 @@ public class CloudSyncTests
     }
 
     private static (CloudSyncService sync, CloudStore store, FakeServer server, Mock<ISessionService> session) NewSync(
-        byte[] remoteZip, string remoteSha, string? lastBackupRecordId
+        byte[] remoteZip, string remoteSha, string? lastBackupRecordId, string accountStatus = "APPROVED"
     )
     {
         var server = new FakeServer(req => (req.Method.Method, req.RequestUri!.AbsolutePath) switch
         {
+            ("GET", "/api/collections/users/records/u1") => Json($$"""{"id":"u1","status":"{{accountStatus}}"}"""),
             ("GET", "/api/collections/vault_backups/records") => Json(
                 $$$"""{"items":[{"id":"r2","collectionId":"col1","created":"2026-11-21 11:00:00.000Z","device":"NOTEBOOK","file":"after_save_r2.zip","sha256":"{{{remoteSha}}}"}]}"""),
             ("POST", "/api/files/token") => Json("""{"token":"ft"}"""),
@@ -268,7 +269,36 @@ public class CloudSyncTests
 
         Assert.Equal(CloudSyncState.IDLE, sync.GetStatus().State);
         Assert.Equal(0, sync.GetStatus().Revision);
-        Assert.Equal([ "GET /api/collections/vault_backups/records" ], server.Requests);
+        Assert.Equal([ "GET /api/collections/users/records/u1", "GET /api/collections/vault_backups/records" ], server.Requests);
+    }
+
+    [Theory]
+    [InlineData("PENDING", CloudAccountStatus.PENDING)]
+    [InlineData("BLOCKED", CloudAccountStatus.BLOCKED)]
+    public async Task Run_AccountNotApproved_NeitherPullsNorPushes(string serverStatus, CloudAccountStatus expected)
+    {
+        var (sync, store, server, _) = NewSync([ 1 ], "", lastBackupRecordId: "r1", accountStatus: serverStatus);
+        sync.ApplyBackup = _ => throw new InvalidOperationException("must not apply");
+        sync.PushSnapshot = () => throw new InvalidOperationException("must not push");
+
+        await sync.Run();
+
+        Assert.Equal(CloudSyncState.WAITING_APPROVAL, sync.GetStatus().State);
+        Assert.Equal(expected, store.Get().AccountStatus);
+        Assert.False(store.Get().IsApproved);
+        Assert.Equal([ "GET /api/collections/users/records/u1" ], server.Requests);
+    }
+
+    [Fact]
+    public async Task Run_AccountApprovedLater_SyncsAgain()
+    {
+        var (sync, store, _, _) = NewSync([ 1 ], "", lastBackupRecordId: "r2");
+        store.Update(c => c with { AccountStatus = CloudAccountStatus.PENDING });
+
+        await sync.Run();
+
+        Assert.Equal(CloudSyncState.IDLE, sync.GetStatus().State);
+        Assert.True(store.Get().IsApproved);
     }
 
     [Fact]

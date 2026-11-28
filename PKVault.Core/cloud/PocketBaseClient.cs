@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace PKVault.Core.Cloud;
 
-public record PocketBaseAuth(string Token, string UserId, string? Name, string? Email);
+public record PocketBaseAuth(string Token, string UserId, string? Name, string? Email, CloudAccountStatus Status = CloudAccountStatus.APPROVED);
 
 public record PocketBaseOAuthProvider(string Name, string AuthUrl, string CodeVerifier);
 
@@ -255,8 +255,26 @@ public partial class PocketBaseClient(HttpClient http)
             Token: root.GetProperty("token").GetString()!,
             UserId: record.GetProperty("id").GetString()!,
             Name: name,
-            Email: Str(record, "email")
+            Email: Str(record, "email"),
+            Status: ParseAccountStatus(Str(record, "status"))
         );
+    }
+
+    /// <summary>A server without user approval has no status field: everyone is approved.</summary>
+    public static CloudAccountStatus ParseAccountStatus(string? value) => value switch
+    {
+        "PENDING" => CloudAccountStatus.PENDING,
+        "BLOCKED" => CloudAccountStatus.BLOCKED,
+        _ => CloudAccountStatus.APPROVED,
+    };
+
+    /// <summary>Approval status of the logged-in user (its own record is always visible to it).</summary>
+    public async Task<CloudAccountStatus> GetAccountStatus(string serverUrl, string token, string userId, CancellationToken ct)
+    {
+        using var doc = await SendJson(HttpMethod.Get,
+            $"{serverUrl}/api/collections/{UsersCollection}/records/{Uri.EscapeDataString(userId)}", null, token, ct);
+        var root = doc.RootElement;
+        return ParseAccountStatus(root.TryGetProperty("status", out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null);
     }
 
     private static ByteArrayContent Json(Action<Utf8JsonWriter> write)

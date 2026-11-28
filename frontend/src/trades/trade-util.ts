@@ -26,6 +26,7 @@ export const getFormatContext = (format: string): EntityContext => formatContext
 
 export const tradeErrorKeys = {
     [ TradeError.NOT_LOGGED_IN ]: 'trades.error.not-logged-in',
+    [ TradeError.NOT_APPROVED ]: 'trades.error.not-approved',
     [ TradeError.PENDING_CHANGES ]: 'trades.error.pending-changes',
     [ TradeError.CANNOT_TRADE ]: 'trades.error.cannot-trade',
     [ TradeError.DUPLICATE ]: 'trades.error.duplicate',

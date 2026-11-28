@@ -122,6 +122,13 @@ public sealed class CloudSyncService(
                 return;
             }
 
+            // not approved by the server owner (yet): nothing to send or receive
+            if (await auth.RefreshAccountStatus(token, cts.Token) != CloudAccountStatus.APPROVED)
+            {
+                SetState(CloudSyncState.WAITING_APPROVAL);
+                return;
+            }
+
             var config = store.Get();
             var latest = (await client.ListBackups(config.ServerUrl, token, 1, cts.Token)).FirstOrDefault();
             var decision = Decide(config, latest);

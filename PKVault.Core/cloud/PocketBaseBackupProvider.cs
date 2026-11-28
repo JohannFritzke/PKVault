@@ -31,6 +31,10 @@ public class PocketBaseBackupProvider(CloudStore store, CloudAuthService auth, P
         if (config.PendingLocalSaveAt == null || config.PendingLocalSaveAt < artifact.CreatedAt)
             config = store.Update(c => c with { PendingLocalSaveAt = artifact.CreatedAt });
 
+        // kept as pending (above) and sent by the sync once the account is approved
+        if (!config.IsApproved)
+            throw new InvalidOperationException("Cloud account waiting for approval");
+
         var existing = await client.FindBackupBySha256(serverUrl, token, artifact.Sha256, cancellationToken);
         if (existing != null)
         {

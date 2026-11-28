@@ -24,6 +24,8 @@ public enum TradeKind
 public enum TradeError
 {
     NOT_LOGGED_IN,
+    /// <summary>The server owner has not approved this account (or blocked it).</summary>
+    NOT_APPROVED,
     /// <summary>Unsaved actions: save or discard them first (the pokémon leaves the storage with a save).</summary>
     PENDING_CHANGES,
     /// <summary>Pokémon attached to a save, external, egg or invalid.</summary>

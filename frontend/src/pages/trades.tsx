@@ -3,7 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftRightIcon, CheckIcon, GiftIcon, InfoIcon, PackageOpenIcon, PlusIcon, RefreshCwIcon, TriangleAlertIcon, XIcon } from 'lucide-react';
 import React from 'react';
-import { TradeKind, TradeStatus, type TradeActionResultDTO, type TradeDTO } from '../data/sdk/model';
+import { CloudApprovalNotice } from '../cloud/cloud-approval-notice';
+import { useCloudStatus } from '../data/sdk/cloud/cloud.gen';
+import { CloudAccountStatus, TradeError, TradeKind, TradeStatus, type TradeActionResultDTO, type TradeDTO } from '../data/sdk/model';
 import { useTradeAccept, useTradeCancel, useTradeDecline, useTradeStatus } from '../data/sdk/trade/trade.gen';
 import { withErrorCatcher } from '../error/with-error-catcher';
 import { TradePokemon } from '../trades/trade-pokemon';
@@ -53,6 +55,8 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
     // kept up to date by TradesWatcher
     const statusQuery = useTradeStatus();
     const status = statusQuery.data?.data;
+    const accountStatus = useCloudStatus().data?.data.accountStatus;
+    const notApproved = status?.error === TradeError.NOT_APPROVED;
 
     const acceptMutation = useTradeAccept();
     const declineMutation = useTradeDecline();
@@ -177,7 +181,9 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                 <Anchor renderRoot={props => <Link {...props} to='/settings' search={{ subMenu: 'cloud' }} />}>{t('trades.logged-out.link')}</Anchor>
             </Alert>}
 
-            {status?.error !== undefined && status.loggedIn && <Alert variant='outline' color='yellow' icon={<TriangleAlertIcon />}>
+            {notApproved && <CloudApprovalNotice accountStatus={accountStatus ?? CloudAccountStatus.PENDING} />}
+
+            {status?.error !== undefined && status.loggedIn && !notApproved && <Alert variant='outline' color='yellow' icon={<TriangleAlertIcon />}>
                 {t(tradeErrorKeys[ status.error ])} {status.errorDetail}
             </Alert>}
 
@@ -192,7 +198,7 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                 {t('trades.to-claim', { count: status.toClaimCount })}
             </Alert>}
 
-            {status?.loggedIn && <>
+            {status?.loggedIn && !notApproved && <>
                 <UISegmentedControl<Tab>
                     name='trades-tab'
                     controlLabel={t('trades.title')}

@@ -2,7 +2,8 @@ import { Alert, Anchor, Badge, Group, Loader, Text } from '@mantine/core';
 import { CloudUploadIcon, LogInIcon, LogOutIcon, RefreshCwIcon, ServerIcon, UserRoundIcon } from 'lucide-react';
 import React from 'react';
 import { useCloudLogin, useCloudLogout, useCloudStatus, useCloudSync } from '../../data/sdk/cloud/cloud.gen';
-import { BackupProviderPushState, CloudLoginError, CloudLoginState, CloudSyncError, CloudSyncState, type CloudStatusDTO } from '../../data/sdk/model';
+import { CloudApprovalNotice } from '../../cloud/cloud-approval-notice';
+import { BackupProviderPushState, CloudAccountStatus, CloudLoginError, CloudLoginState, CloudSyncError, CloudSyncState, type CloudStatusDTO } from '../../data/sdk/model';
 import { useTranslate } from '../../translate/i18n';
 import { UIButton } from '../../ui/form/button/ui-button';
 import { UISettingsRow } from '../../ui/settings/section/ui-settings-row';
@@ -97,6 +98,8 @@ export const SettingsCloudAccount: React.FC = () => {
                 return <Group gap='xs'><Loader size='xs' />{t('cloud.sync.pulling')}</Group>;
             case CloudSyncState.WAITING_LOCAL_CHANGES:
                 return t('cloud.sync.waiting-local');
+            case CloudSyncState.WAITING_APPROVAL:
+                return t('cloud.sync.waiting-approval');
             case CloudSyncState.ERROR:
                 return <>
                     {{
@@ -148,6 +151,9 @@ export const SettingsCloudAccount: React.FC = () => {
                     {t('cloud.account.via', { provider: providerLabel(status.provider) })}
                 </Badge>}
             </UISettingsRow>
+
+            {status.loggedIn && status.accountStatus !== undefined && status.accountStatus !== CloudAccountStatus.APPROVED
+                && <CloudApprovalNotice accountStatus={status.accountStatus} />}
 
             {status.loggedIn && <UISettingsRow icon={<CloudUploadIcon />}
                 label={t('cloud.backup.label')}

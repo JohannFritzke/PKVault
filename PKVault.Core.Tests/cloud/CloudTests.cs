@@ -270,6 +270,27 @@ public class CloudTests
     );
 
     [Fact]
+    public async Task Provider_AccountNotApproved_KeepsSavePendingWithoutUploading()
+    {
+        var (provider, handler, store) = NewProvider(lastBackup: "r-parent", shaExists: false);
+        store.Update(c => c with { AccountStatus = CloudAccountStatus.PENDING });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => provider.Push(artifact, CancellationToken.None));
+
+        Assert.Empty(handler.Requests);
+        Assert.Equal(artifact.CreatedAt, store.Get().PendingLocalSaveAt);
+    }
+
+    [Fact]
+    public void Store_KeepsAccountStatus()
+    {
+        var (store, fs) = NewStore();
+        store.Update(c => c with { ServerUrl = Server, Token = "t", UserId = "u1", AccountStatus = CloudAccountStatus.PENDING });
+
+        Assert.Equal(CloudAccountStatus.PENDING, new CloudStore(fs, StorePath).Get().AccountStatus);
+    }
+
+    [Fact]
     public async Task Provider_UploadsWithParent_AndRemembersRecord()
     {
         var (provider, handler, store) = NewProvider(lastBackup: "r-parent", shaExists: false);

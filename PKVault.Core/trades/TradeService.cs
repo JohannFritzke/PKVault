@@ -29,6 +29,8 @@ public sealed class TradeService(
         var config = store.Get();
         if (!config.IsLoggedIn)
             return new(false, null, [], [], 0, ClaimRevision, null, null);
+        if (!config.IsApproved)
+            return new(true, config.UserId, [], [], 0, ClaimRevision, TradeError.NOT_APPROVED, null);
 
         try
         {
@@ -237,6 +239,8 @@ public sealed class TradeService(
         var config = store.Get();
         if (!config.IsLoggedIn)
             return new(false, TradeError.NOT_LOGGED_IN, null);
+        if (!config.IsApproved)
+            return new(false, TradeError.NOT_APPROVED, null);
 
         try
         {

@@ -21,9 +21,19 @@ public enum CloudLoginError
     EXPIRED,
 }
 
+/// <summary>Accounts are approved by the server owner before they can use backups and trades.</summary>
+public enum CloudAccountStatus
+{
+    APPROVED,
+    PENDING,
+    BLOCKED,
+}
+
 public enum CloudSyncState
 {
     IDLE,
+    /// <summary>The account is not approved (yet): nothing is sent or received.</summary>
+    WAITING_APPROVAL,
     CHECKING,
     PULLING,
     /// <summary>Unsaved actions: sync waits for "Save" or "Discard".</summary>
@@ -62,7 +72,9 @@ public record CloudStatusDTO(
     CloudSyncError? SyncError,
     string? SyncErrorDetail,
     /// <summary>Increased each time pokémon received by trade were stored here: the app refreshes its storage.</summary>
-    int TradeClaimRevision = 0
+    int TradeClaimRevision = 0,
+    /// <summary>Null when logged out.</summary>
+    CloudAccountStatus? AccountStatus = null
 );
 
 public record CloudLoginRequestDTO(string Provider);

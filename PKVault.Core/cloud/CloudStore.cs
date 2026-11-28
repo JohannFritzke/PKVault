@@ -24,8 +24,12 @@ public record CloudConfig
     public DateTime? PendingLocalSaveAt { get; init; }
     /// <summary>Trade pokémon already stored here, but not yet marked as claimed on the server (never store them twice).</summary>
     public IReadOnlyList<string> StoredTradePokemonIds { get; init; } = [];
+    /// <summary>Last known approval status of the account (checked at each sync).</summary>
+    public CloudAccountStatus AccountStatus { get; init; } = CloudAccountStatus.APPROVED;
 
     public bool IsLoggedIn => !string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(UserId);
+
+    public bool IsApproved => IsLoggedIn && AccountStatus == CloudAccountStatus.APPROVED;
 
     public CloudConfig LoggedOut() => new() { ServerUrl = ServerUrl, StoredTradePokemonIds = StoredTradePokemonIds };
 }
@@ -85,6 +89,7 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
                 PendingLocalSaveAt = DateTime.TryParse(Str("pendingLocalSaveAt"), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var pending)
                     ? pending.ToUniversalTime()
                     : null,
+                AccountStatus = PocketBaseClient.ParseAccountStatus(Str("accountStatus")),
                 StoredTradePokemonIds = root.TryGetProperty("storedTradePokemonIds", out var stored) && stored.ValueKind == JsonValueKind.Array
                     ? [.. stored.EnumerateArray().Where(v => v.ValueKind == JsonValueKind.String).Select(v => v.GetString()!)]
                     : [],
@@ -115,6 +120,8 @@ public class CloudStore(IFileSystem fileSystem, string? filePath = null)
             Opt("userName", config.UserName);
             Opt("userEmail", config.UserEmail);
             Opt("lastBackupRecordId", config.LastBackupRecordId);
+            if (config.AccountStatus != CloudAccountStatus.APPROVED)
+                writer.WriteString("accountStatus", config.AccountStatus.ToString());
             Opt("pendingLocalSaveAt", config.PendingLocalSaveAt?.ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
             if (config.StoredTradePokemonIds.Count > 0)
             {

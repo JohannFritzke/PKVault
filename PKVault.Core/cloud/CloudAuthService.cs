@@ -34,6 +34,21 @@ public sealed class CloudAuthService(
 
     public bool IsLoggedIn => store.Get().IsLoggedIn;
 
+    public bool IsApproved => store.Get().IsApproved;
+
+    /// <summary>Asks the server whether the account is approved (the owner may have changed it), and remembers it.</summary>
+    public async Task<CloudAccountStatus> RefreshAccountStatus(string token, CancellationToken ct)
+    {
+        var config = store.Get();
+        var status = await client.GetAccountStatus(config.ServerUrl, token, config.UserId!, ct);
+        if (status != config.AccountStatus)
+        {
+            store.Update(c => c.UserId == config.UserId ? c with { AccountStatus = status } : c);
+            Log.Information($"Cloud: account is now {status}");
+        }
+        return status;
+    }
+
     public CloudStatusDTO GetStatus(BackupProviderDispatcher? dispatcher, CloudSyncService.CloudSyncStatus? sync = null)
     {
         var config = store.Get();
@@ -61,7 +76,8 @@ public sealed class CloudAuthService(
                 LastPulledBackupAt: sync?.LastPulledBackupAt,
                 LastPulledSavesSkipped: sync?.LastPulledSavesSkipped ?? 0,
                 SyncError: sync?.Error,
-                SyncErrorDetail: sync?.ErrorDetail
+                SyncErrorDetail: sync?.ErrorDetail,
+                AccountStatus: config.IsLoggedIn ? config.AccountStatus : null
             );
         }
     }
@@ -230,6 +246,7 @@ public sealed class CloudAuthService(
         UserId = auth.UserId,
         UserName = auth.Name ?? (config.UserId == auth.UserId ? config.UserName : null),
         UserEmail = auth.Email ?? (config.UserId == auth.UserId ? config.UserEmail : null),
+        AccountStatus = auth.Status,
         // the chain of backups belongs to one account
         LastBackupRecordId = config.UserId == auth.UserId ? config.LastBackupRecordId : null,
     };
