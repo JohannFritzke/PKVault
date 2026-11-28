@@ -1,11 +1,13 @@
-import { Alert, Box, Group, Stack } from '@mantine/core';
+import { Alert, Box, Group, Stack, Text } from '@mantine/core';
 import { AlertCircleIcon, ExternalLinkIcon, InfoIcon } from 'lucide-react';
 import React from 'react';
 import { usePkmAttachState } from '../../data/hooks/use-pkm-attach-state';
 import { usePkmIndex } from '../../data/hooks/use-pkm-index';
 import { usePkmLegality } from '../../data/hooks/use-pkm-legality';
 import { usePkmVariantAttach } from '../../data/hooks/use-pkm-variant-attach';
-import { PKMLoadError, type PkmSaveDTO, type PkmVariantDTO } from '../../data/sdk/model';
+import { BoxType, PKMLoadError, type PkmSaveDTO, type PkmVariantDTO } from '../../data/sdk/model';
+import { useSaveInfosGetAll } from '../../data/sdk/save-infos/save-infos.gen';
+import { useStorageGetBoxes } from '../../data/sdk/storage/storage.gen';
 import { withErrorCatcher } from '../../error/with-error-catcher';
 import { useStaticData } from '../../hooks/use-static-data';
 import { ItemImg } from '../../img/item-img';
@@ -23,11 +25,11 @@ import { UIDetailsContentStats } from '../../ui/storage/storage-details/content/
 import { UIDetailsStatsRow, type UIDetailsStatName, type UIDetailsStatsRowProps } from '../../ui/storage/storage-details/content/stats/ui-details-stats-row';
 import { UIDetailsStatsTotalRow } from '../../ui/storage/storage-details/content/stats/ui-details-stats-total-row';
 import { UIDetailsContent, type UIDetailsContentProps } from '../../ui/storage/storage-details/content/ui-details-content';
-import { UIDetailsContentExpanded } from '../../ui/storage/storage-details/content/ui-details-content-expanded';
 import { UIDetailsContentSummary } from '../../ui/storage/storage-details/content/ui-details-content-summary';
+import { UIDetailsInfoBox, UIDetailsInfoBoxes } from '../../ui/storage/storage-details/content/ui-details-info-box';
 import { switchUtilRequired } from '../../util/switch-util';
 import { useCurrentStorage } from '../panel/storage-panel-context';
-import { useStorageSelectExpanded } from './hooks/use-storage-select-expanded';
+import { DetailsHistory } from './details-history';
 import { MoveItem } from './move-item/move-item';
 import { Ribbon } from './ribbon/ribbon';
 
@@ -37,8 +39,6 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
     const { t } = useTranslate();
 
     const staticData = useStaticData();
-
-    const { expanded } = useStorageSelectExpanded();
 
     const { getSelected } = useCurrentStorage();
     const selectedSaveId = Route.useSearch({ select: search => getSelected(search.selected)?.saveId }) ?? null;
@@ -52,11 +52,18 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
     const pkmLegalityQuery = usePkmLegality(selectedId, selectedSaveId ?? undefined);
     const pkmLegality = pkmLegalityQuery.data?.data;
 
+    const boxes = useStorageGetBoxes().data?.data ?? [];
+    const savesInfos = useSaveInfosGetAll().data?.data ?? {};
+
     const attachStateQuery = usePkmAttachState(selectedSaveId, selectedId);
     const attachState = attachStateQuery.data;
 
     if (!pkm || !pkmLegality)
         return null;
+
+    const boxName = isVariant(pkm) ? boxes.find(box => box.idInt === pkm.boxId)?.name : undefined;
+    const saveInfos = !isVariant(pkm) && selectedSaveId ? savesInfos[ selectedSaveId ] : undefined;
+    const saveName = saveInfos && `${staticData.versions[ saveInfos.version ]?.name ?? ''} (${saveInfos.trainerName})`;
 
     const natureObj = pkm.nature === undefined ? undefined : staticData.natures[ pkm.nature ];
 
@@ -144,20 +151,34 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
         </Alert>,
     ].filter(Boolean);
 
+    const location = isVariant(pkm)
+        ? t('details.location.storage', { box: boxName ?? `#${pkm.boxId + 1}`, slot: pkm.boxSlot + 1 })
+        : pkm.boxId === BoxType.Party
+            ? t('details.location.save-party', { save: saveName ?? '', slot: pkm.boxSlot + 1 })
+            : t('details.location.save', { save: saveName ?? '', box: pkm.boxId + 1, slot: pkm.boxSlot + 1 });
+
     const content: UIDetailsContentProps[ 'content' ] = [
-        issues.length > 0 && {
-            name: 'issue',
-            label: <><UIPokedexIcons.Warn size='xs' /> {t('details.issues.title')}</>,
+        {
+            name: 'summary',
+            label: <>{issues.length > 0 && <UIPokedexIcons.Warn size='xs' />} {t('details.summary.title')}</>,
             content: <Stack>
+                {issues.length > 0 && <Text fw={700}>{t('details.issues.title')}</Text>}
+
                 {issues.map((issue, i) => <React.Fragment key={i}>
                     {issue}
                 </React.Fragment>)}
-            </Stack>,
-        },
-        pkm.isEnabled && {
-            name: 'summary',
-            label: t('details.summary.title'),
-            content: <UIDetailsContentSummary
+
+                <UIDetailsInfoBoxes>
+                    <UIDetailsInfoBox label={t('details.location.title')} value={location} />
+                    {pkm.isEnabled && <UIDetailsInfoBox
+                        label={t('details.legality.title')}
+                        value={pkmLegality.isValid ? t('details.legality.valid') : t('details.legality.invalid')}
+                        tone={pkmLegality.isValid ? 'good' : 'warning'}
+                        hint={pkmLegality.isValid ? t('details.legality.valid.hint') : t('details.legality.invalid.hint')}
+                    />}
+                </UIDetailsInfoBoxes>
+
+                {pkm.isEnabled && <UIDetailsContentSummary
                 id={pkm.id}
                 heldItem={pkm.generation > 1
                     ? (pkm.heldItem > 0
@@ -172,7 +193,16 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
                 specialAbility={pkm.generation === 3}
                 isAbilityHidden={pkm.isAbilityHidden}
                 pid={pkm.pid}
-            />,
+            />}
+
+                {pkm.isEnabled && <UIDetailsContentMisc
+                isEgg={pkm.isEgg}
+                eggHatchCount={pkm.eggHatchCount}
+                friendship={pkm.friendship}
+                language={staticData.languages[ pkm.languageID ]}
+                homeTracker={pkm.homeTracker}
+            />}
+            </Stack>,
         },
         pkm.isEnabled && {
             name: 'stats',
@@ -232,19 +262,13 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
                 ))}
             />,
         },
-        pkm.isEnabled && (pkm.contest || pkm.ribbons) && {
-            name: 'contest',
-            label: t('details.contest'),
-            content: <UIDetailsContentCosmetic
-                contest={pkm.contest?.map((value, i) => <UIContest key={i} index={i} value={value} />)}
-                ribbons={pkm.ribbons && Object.entries(pkm.ribbons)
-                    .map(([ name, count ]) => <Ribbon key={name} name={name} count={count} />)}
-            />,
-        },
         pkm.isEnabled && {
-            name: 'origin',
-            label: t('details.origin'),
-            content: <UIDetailsContentOrigin
+            name: 'more',
+            label: t('details.more.title'),
+            content: <Stack>
+                <Text fw={700}>{t('details.origin')}</Text>
+
+                <UIDetailsContentOrigin
                 game={<Group>
                     <UIGameImg
                         size='1lh'
@@ -263,22 +287,23 @@ export const DetailsContent: React.FC = withErrorCatcher('default', () => {
                 originMetLevel={pkm.originMetLevel}
                 originMetDate={pkm.originMetDate}
                 fatefulEncounter={pkm.fatefulEncounter}
-            />,
+            />
+
+                {(pkm.contest || pkm.ribbons) && <Text fw={700}>{t('details.contest')}</Text>}
+
+                {(pkm.contest || pkm.ribbons) && <UIDetailsContentCosmetic
+                contest={pkm.contest?.map((value, i) => <UIContest key={i} index={i} value={value} />)}
+                ribbons={pkm.ribbons && Object.entries(pkm.ribbons)
+                    .map(([ name, count ]) => <Ribbon key={name} name={name} count={count} />)}
+            />}
+            </Stack>,
         },
-        pkm.isEnabled && {
-            name: 'misc',
-            label: t('details.misc.title'),
-            content: <UIDetailsContentMisc
-                isEgg={pkm.isEgg}
-                eggHatchCount={pkm.eggHatchCount}
-                friendship={pkm.friendship}
-                language={staticData.languages[ pkm.languageID ]}
-                homeTracker={pkm.homeTracker}
-            />,
+        {
+            name: 'history',
+            label: t('details.history.title'),
+            content: <DetailsHistory pkmVariantId={isVariant(pkm) ? pkm.id : undefined} />,
         },
     ].filter(item => typeof item === 'object');
 
-    return expanded
-        ? <UIDetailsContentExpanded content={content} />
-        : <UIDetailsContent content={content} />;
+    return <UIDetailsContent content={content} />;
 });

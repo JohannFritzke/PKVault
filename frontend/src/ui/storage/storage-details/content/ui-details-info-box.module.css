@@ -1,0 +1,42 @@
+.boxes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--mantine-spacing-sm);
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+    border: 1px solid var(--mantine-color-default-border);
+    border-radius: var(--mantine-radius-md);
+}
+
+.label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mantine-color-dimmed);
+}
+
+.value {
+    overflow-wrap: anywhere;
+}
+
+.value[data-tone="good"] {
+    font-weight: 700;
+    color: var(--mantine-color-green-6);
+}
+
+.value[data-tone="warning"] {
+    font-weight: 700;
+    color: var(--mantine-color-yellow-6);
+}
+
+.hint {
+    font-size: 13px;
+    color: var(--mantine-color-dimmed);
+}

@@ -50,7 +50,8 @@ const useOpened = () => {
         return s.container === currentContainer;
     }) ?? false;
 
-    const opened = selectOpened || multiSelectOpened;
+    // a single pokémon opens in a dialog (StorageDetails), several in the side panel
+    const opened = multiSelectOpened && !selectOpened;
 
     return { opened, selectOpened, multiSelectOpened };
 };
@@ -87,7 +88,8 @@ export const StoragePanelWrapperDetails: React.FC = () => {
 
     const seeThrough = isMoveDragging && stateRef.current.opened;
 
-    return <UIStoragePanelWrapperDetails
+    return <>
+    <UIStoragePanelWrapperDetails
         opened={opened}
         setOpened={setOpened}
         position={position}
@@ -95,11 +97,12 @@ export const StoragePanelWrapperDetails: React.FC = () => {
         // eslint-disable-next-line react-hooks/refs
         seeThrough={seeThrough}
         details={<Stack w='100%'>
-            {multiSelectOpened && <MultiSelectActions enabled={!selectOpened} />}
-
-            {selectOpened && <StorageDetails />}
+            {multiSelectOpened && <MultiSelectActions enabled />}
         </Stack>}
     >
         <StoragePanel />
-    </UIStoragePanelWrapperDetails>;
+    </UIStoragePanelWrapperDetails>
+
+    {selectOpened && <StorageDetails />}
+    </>;
 };
