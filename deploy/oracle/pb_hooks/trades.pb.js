@@ -149,7 +149,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/decline", (e) => {
         if (!allowed) {
             throw new BadRequestError("This trade cannot be declined by you now.");
         }
-        lib.closeWithReturn(txApp, trade, "DECLINED");
+        lib.closeWithReturn(txApp, trade, "DECLINED", me);
     });
 
     return e.json(200, trade);
@@ -167,7 +167,7 @@ routerAdd("POST", "/api/pokehome/trades/{id}/cancel", (e) => {
         if (me !== trade.getString("from") || (status !== "OPEN" && status !== "COUNTERED")) {
             throw new BadRequestError("This trade cannot be cancelled by you now.");
         }
-        lib.closeWithReturn(txApp, trade, "CANCELLED");
+        lib.closeWithReturn(txApp, trade, "CANCELLED", me);
     });
 
     return e.json(200, trade);

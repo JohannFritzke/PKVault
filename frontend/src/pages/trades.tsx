@@ -1,4 +1,4 @@
-import { Alert, Anchor, Badge, EmptyState, Group, Loader } from '@mantine/core';
+import { Alert, Anchor, EmptyState, Group, Loader } from '@mantine/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import { ArrowLeftRightIcon, CheckIcon, GiftIcon, InfoIcon, PackageOpenIcon, PlusIcon, RefreshCwIcon, TriangleAlertIcon, XIcon } from 'lucide-react';
@@ -17,23 +17,46 @@ import { UISegmentedControl } from '../ui/form/select/ui-segmented-control';
 import { UIConfirmPopover } from '../ui/popover/ui-confirm-popover';
 import { UISavesContent } from '../ui/saves/ui-saves-content';
 import { UISavesHeader, UISavesScroll } from '../ui/saves/ui-saves-layout';
-import { UITradeCard } from '../ui/trades/ui-trade-card';
+import { UITradeCard, UITradeStatus, type UITradeTone } from '../ui/trades/ui-trade-card';
 import { renderDate, renderTime } from '../util/render-date-time';
 
-type Tab = 'received' | 'sent' | 'history';
+type Tab = 'all' | 'received' | 'sent' | 'history';
 
 const isActive = (trade: TradeDTO) => trade.status === TradeStatus.OPEN || trade.status === TradeStatus.COUNTERED;
 
-const statusKeys = {
-    [ TradeStatus.OPEN ]: 'trades.status.open',
-    [ TradeStatus.COUNTERED ]: 'trades.status.countered',
-    [ TradeStatus.DONE ]: 'trades.status.done',
-    [ TradeStatus.DECLINED ]: 'trades.status.declined',
-    [ TradeStatus.CANCELLED ]: 'trades.status.cancelled',
-    [ TradeStatus.EXPIRED ]: 'trades.status.expired',
-} as const;
+/** Who must act now: the sender answers a counter-offer, the receiver answers an offer. */
+const isWaitingForMe = (trade: TradeDTO) => trade.isSender
+    ? trade.status === TradeStatus.COUNTERED
+    : trade.status === TradeStatus.OPEN;
+
+const getTone = (trade: TradeDTO): UITradeTone => {
+    if (isActive(trade))
+        return isWaitingForMe(trade) ? 'you' : 'friend';
+    return trade.status === TradeStatus.DONE ? 'done' : 'failed';
+};
+
+const getStatusKey = (trade: TradeDTO) => {
+    switch (trade.status) {
+        case TradeStatus.OPEN:
+        case TradeStatus.COUNTERED:
+            return isWaitingForMe(trade) ? 'trades.status.waiting-you' : 'trades.status.waiting-friend';
+        case TradeStatus.DONE:
+            return 'trades.status.done';
+        case TradeStatus.DECLINED:
+            return trade.closedByMe === true ? 'trades.status.declined-by-you'
+                : trade.closedByMe === false ? 'trades.status.declined-by-friend'
+                    : 'trades.status.declined';
+        case TradeStatus.CANCELLED:
+            return trade.closedByMe === false || (trade.closedByMe == null && !trade.isSender)
+                ? 'trades.status.cancelled-by-friend'
+                : 'trades.status.cancelled-by-you';
+        case TradeStatus.EXPIRED:
+            return 'trades.status.expired';
+    }
+};
 
 const emptyKeys = {
+    all: 'trades.empty.all',
     received: 'trades.empty.received',
     sent: 'trades.empty.sent',
     history: 'trades.empty.history',
@@ -48,7 +71,7 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
     const { t } = useTranslate();
     const queryClient = useQueryClient();
 
-    const [ tab, setTab ] = React.useState<Tab>('received');
+    const [ tab, setTab ] = React.useState<Tab>('all');
     const [ lastResult, setLastResult ] = React.useState<TradeActionResultDTO>();
     const [ answering, setAnswering ] = React.useState<TradeDTO>();
 
@@ -73,7 +96,7 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
     const received = trades.filter(trade => !trade.isSender && isActive(trade));
     const sent = trades.filter(trade => trade.isSender && isActive(trade));
     const history = trades.filter(trade => !isActive(trade));
-    const shown = { received, sent, history }[ tab ];
+    const shown = { all: trades, received, sent, history }[ tab ];
 
     const renderActions = (trade: TradeDTO) => {
         if (!isActive(trade))
@@ -205,6 +228,7 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                     value={tab}
                     onChange={setTab}
                     data={[
+                        { value: 'all', label: `${t('trades.tab.all')} (${trades.length})` },
                         { value: 'received', label: `${t('trades.tab.received')} (${received.length})` },
                         { value: 'sent', label: `${t('trades.tab.sent')} (${sent.length})` },
                         { value: 'history', label: t('trades.tab.history') },
@@ -229,9 +253,10 @@ export const TradesPage: React.FC = withErrorCatcher('default', () => {
                     people={trade.isSender
                         ? t('trades.card.to', { name: trade.toName })
                         : t('trades.card.from', { name: trade.fromName })}
-                    status={<Badge variant={trade.status === TradeStatus.DONE ? 'filled' : 'default'}>
-                        {t(statusKeys[ trade.status ])}
-                    </Badge>}
+                    tone={getTone(trade)}
+                    status={<UITradeStatus tone={getTone(trade)}>
+                        {t(getStatusKey(trade), { name: trade.isSender ? trade.toName : trade.fromName })}
+                    </UITradeStatus>}
                     date={isActive(trade)
                         ? t('trades.card.expires', { date: renderDateTime(trade.expiresAt) })
                         : renderDateTime(trade.closedAt ?? trade.created)}

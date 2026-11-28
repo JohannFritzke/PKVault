@@ -69,7 +69,8 @@ public sealed class TradeService(
                     : t.Countered,
                 Created: t.Created,
                 ExpiresAt: t.ExpiresAt,
-                ClosedAt: t.ClosedAt
+                ClosedAt: t.ClosedAt,
+                ClosedByMe: t.ClosedBy == null ? null : t.ClosedBy == config.UserId
             )).ToList();
 
             var toClaim = toClaimTask.Result.Count;

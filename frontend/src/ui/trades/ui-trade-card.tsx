@@ -29,7 +29,28 @@ export const UITradePokemon: React.FC<UITradePokemonProps> = ({ img, name, meta,
     </div>;
 };
 
+/**
+ * - you: waiting for the current user (amber)
+ * - friend: waiting for the friend (neutral)
+ * - done: completed (green)
+ * - failed: declined, cancelled or expired (red, the text says why)
+ */
+export type UITradeTone = 'you' | 'friend' | 'done' | 'failed';
+
+type UITradeStatusProps = {
+    tone: UITradeTone;
+    children: React.ReactNode;
+};
+
+export const UITradeStatus: React.FC<UITradeStatusProps> = ({ tone, children }) => {
+    return <span className={classes.status} data-tone={tone}>
+        <span className={classes.statusDot} />
+        {children}
+    </span>;
+};
+
 type UITradeCardProps = {
+    tone: UITradeTone;
     people: React.ReactNode;
     status: React.ReactNode;
     date: React.ReactNode;
@@ -39,8 +60,8 @@ type UITradeCardProps = {
     actions?: React.ReactNode;
 };
 
-export const UITradeCard: React.FC<UITradeCardProps> = ({ people, status, date, offered, countered, messages, actions }) => {
-    return <div className={classes.uiTradeCard}>
+export const UITradeCard: React.FC<UITradeCardProps> = ({ tone, people, status, date, offered, countered, messages, actions }) => {
+    return <div className={classes.uiTradeCard} data-tone={tone}>
         <div className={classes.header}>
             <span className={classes.people}>{people}</span>
             {status}

@@ -172,7 +172,8 @@ public partial class PocketBaseClient
         CounteredPokemonId: Str(item, "countered"),
         Created: ParseDate(Str(item, "created")),
         ExpiresAt: ParseDate(Str(item, "expiresAt")),
-        ClosedAt: Str(item, "closedAt") is string closed ? ParseDate(closed) : null
+        ClosedAt: Str(item, "closedAt") is string closed ? ParseDate(closed) : null,
+        ClosedBy: Str(item, "closedBy") is { Length: > 0 } closedBy ? closedBy : null
     );
 
     private static TradePokemonSummaryDTO? ReadSummary(JsonElement item, string name)
@@ -208,7 +209,8 @@ public record PocketBaseTradeRecord(
     string Id, string From, string To, TradeStatus Status, TradeKind Kind, string? Message, string? CounterMessage,
     TradePokemonSummaryDTO? Offered, TradePokemonSummaryDTO? Countered,
     DateTime Created, DateTime ExpiresAt, DateTime? ClosedAt,
-    string? OfferedPokemonId = null, string? CounteredPokemonId = null
+    string? OfferedPokemonId = null, string? CounteredPokemonId = null,
+    string? ClosedBy = null
 );
 
 public record PocketBaseTradePokemonRecord(string Id, string CollectionId, string File, string Format, int Species, string? Trade);

@@ -97,7 +97,7 @@ function addHistory(txApp, pokemon, fromId, toId, tradeId) {
 }
 
 /** Ends a trade without exchange: every pokémon goes back to the user who put it in. */
-function closeWithReturn(txApp, trade, status) {
+function closeWithReturn(txApp, trade, status, closedBy) {
     const offered = findPokemon(txApp, trade.getString("offered"));
     if (offered && offered.getString("status") === "CUSTODY") {
         giveTo(txApp, offered, trade.getString("from"));
@@ -109,6 +109,9 @@ function closeWithReturn(txApp, trade, status) {
 
     trade.set("status", status);
     trade.set("closedAt", now());
+    if (closedBy) {
+        trade.set("closedBy", closedBy);
+    }
     txApp.save(trade);
 }
 

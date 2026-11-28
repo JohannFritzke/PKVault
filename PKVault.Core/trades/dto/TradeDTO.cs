@@ -63,7 +63,9 @@ public record TradeDTO(
     TradePokemonSummaryDTO? Countered,
     DateTime Created,
     DateTime ExpiresAt,
-    DateTime? ClosedAt
+    DateTime? ClosedAt,
+    /// <summary>Declined or cancelled by the current user. Null: unknown (older server) or not closed by someone.</summary>
+    bool? ClosedByMe = null
 );
 
 public record TradesStatusDTO(

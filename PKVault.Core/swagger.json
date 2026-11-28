@@ -6316,6 +6316,9 @@
           "closedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "closedByMe": {
+            "type": "boolean"
           }
         }
       },

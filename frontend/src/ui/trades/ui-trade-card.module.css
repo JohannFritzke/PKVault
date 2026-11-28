@@ -9,6 +9,62 @@
     background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
 }
 
+.ui-trade-card[data-tone="you"] {
+    --trade-tone: var(--mantine-color-yellow-6);
+}
+
+.ui-trade-card[data-tone="done"] {
+    --trade-tone: var(--mantine-color-green-6);
+}
+
+.ui-trade-card[data-tone="failed"] {
+    --trade-tone: var(--mantine-color-red-6);
+}
+
+.ui-trade-card:is([data-tone="you"], [data-tone="done"], [data-tone="failed"]) {
+    border-color: color-mix(in srgb, var(--trade-tone) 35%, transparent);
+    background-color: color-mix(in srgb, var(--trade-tone) 5%, light-dark(var(--mantine-color-white), var(--mantine-color-dark-8)));
+}
+
+.status {
+    --trade-tone: var(--mantine-color-dimmed);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--mantine-color-text);
+    background-color: color-mix(in srgb, var(--trade-tone) 15%, transparent);
+}
+
+.status[data-tone="you"] {
+    --trade-tone: var(--mantine-color-yellow-6);
+
+    color: var(--trade-tone);
+}
+
+.status[data-tone="done"] {
+    --trade-tone: var(--mantine-color-green-6);
+
+    color: var(--trade-tone);
+}
+
+.status[data-tone="failed"] {
+    --trade-tone: var(--mantine-color-red-6);
+
+    color: light-dark(var(--mantine-color-red-7), var(--mantine-color-red-4));
+}
+
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--trade-tone);
+}
+
 .header {
     display: flex;
     flex-wrap: wrap;
