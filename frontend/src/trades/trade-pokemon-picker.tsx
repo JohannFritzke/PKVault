@@ -18,7 +18,8 @@ import { getBackControl } from '../ui/interaction/focus-controls/common-controls
 import { FocusScope } from '../ui/interaction/focus/scope/focus-scope';
 import { useFocusScopeContext } from '../ui/interaction/focus/scope/use-focus-scope-context';
 import classes from '../ui/trades/ui-trade-picker.module.css';
-import { tradeErrorKeys } from './trade-util';
+import { tradeBlockText, tradeErrorKeys } from './trade-util';
+import { useTradeBlocked } from '../data/sdk/trade/trade.gen';
 
 const canTrade = (pkm: PkmVariantDTO) => pkm.isMain
     && !pkm.isExternal
@@ -78,6 +79,9 @@ const TradePokemonPickerInner: React.FC<Omit<TradePokemonPickerProps, 'opened'>>
     const currentBoxId = boxId ?? firstBoxWithPkm?.idInt;
     const currentBox = boxes.find(box => box.idInt === currentBoxId);
 
+    const blockedQuery = useTradeBlocked(currentBox?.id ?? '', { query: { enabled: !!currentBox, staleTime: 30_000 } });
+    const blocked = new Map((blockedQuery.data?.data ?? []).map(block => [ block.pkmVariantId, block ]));
+
     const [ selected, setSelected ] = React.useState<PkmVariantDTO>();
     const [ message, setMessage ] = React.useState('');
     const [ result, setResult ] = React.useState<TradeActionResultDTO>();
@@ -120,15 +124,18 @@ const TradePokemonPickerInner: React.FC<Omit<TradePokemonPickerProps, 'opened'>>
                     if (!pkm) {
                         return <div key={slot} className={classes.slot} />;
                     }
-                    const tradable = canTrade(pkm);
-                    return <div key={slot} className={classes.slot} data-selected={selected?.id === pkm.id}>
+                    const block = blocked.get(pkm.id);
+                    const tradable = canTrade(pkm) && !block;
+                    return <div key={slot} className={classes.slot} data-selected={selected?.id === pkm.id} data-blocked={!!block || undefined}>
                         <UIActionIcon
                             name={`trade-picker-slot-${slot}`}
                             controlLabel={t('action.select')}
                             variant='subtle'
-                            size='xl'
+                            className={classes.slotButton}
                             disabled={!tradable}
-                            title={tradable ? speciesName(pkm) : t('trades.picker.not-tradable')}
+                            title={block
+                                ? `${speciesName(pkm)}: ${tradeBlockText(t, block)}`
+                                : tradable ? speciesName(pkm) : t('trades.picker.not-tradable')}
                             onClick={() => setSelected(pkm)}
                         >
                             <SpeciesImg

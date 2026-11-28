@@ -1950,6 +1950,40 @@
         }
       }
     },
+    "/api/trade/blocked/{boxId}": {
+      "get": {
+        "tags": [
+          "Trade"
+        ],
+        "operationId": "Trade_Blocked",
+        "parameters": [
+          {
+            "name": "boxId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TradeBlockDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/trade/history/{pkmVariantId}": {
       "get": {
         "tags": [
@@ -6069,6 +6103,7 @@
           "PENDING_CHANGES",
           "CANNOT_TRADE",
           "DUPLICATE",
+          "ILLEGAL",
           "NOT_FOUND",
           "SERVER"
         ],
@@ -6079,7 +6114,8 @@
           3,
           4,
           5,
-          6
+          6,
+          7
         ]
       },
       "TradeCounterRequestDTO": {
@@ -6096,6 +6132,37 @@
             "type": "string"
           }
         }
+      },
+      "TradeBlockDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "pkmVariantId",
+          "reason"
+        ],
+        "properties": {
+          "pkmVariantId": {
+            "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/TradeBlockReason"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "TradeBlockReason": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "DUPLICATE",
+          "ILLEGAL"
+        ],
+        "enum": [
+          0,
+          1
+        ]
       },
       "PokemonHistoryEntryDTO": {
         "type": "object",
@@ -6339,6 +6406,9 @@
           },
           "fingerprint": {
             "type": "string"
+          },
+          "legal": {
+            "type": "boolean"
           }
         }
       },

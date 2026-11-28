@@ -5,6 +5,9 @@
 }
 
 .slot {
+    /* the sprite fits the slot (96px sprites were cut by the button) */
+    --sprite-species-size-multiplier: 0.6;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -25,4 +28,21 @@
     gap: var(--mantine-spacing-sm);
     min-height: 40px;
     font-size: 14px;
+}
+
+.slot-button {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* cannot be traded (duplicate or illegal) */
+.slot[data-blocked="true"] {
+    border-style: dashed;
+    border-color: var(--mantine-color-yellow-6);
+}
+
+.slot[data-blocked="true"] .slot-button {
+    opacity: 0.55;
 }

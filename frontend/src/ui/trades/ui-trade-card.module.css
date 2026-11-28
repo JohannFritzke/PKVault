@@ -77,6 +77,12 @@
     color: var(--mantine-color-dimmed);
 }
 
+.pokemon-warning {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mantine-color-yellow-6);
+}
+
 .message {
     padding-left: var(--mantine-spacing-sm);
     border-left: 2px solid var(--mantine-color-default-border);

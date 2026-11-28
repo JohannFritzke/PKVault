@@ -32,6 +32,8 @@ public enum TradeError
     CANNOT_TRADE,
     /// <summary>Another copy of this pokémon exists in a save or elsewhere in the storage (after "detach" for example).</summary>
     DUPLICATE,
+    /// <summary>PKHeX finds the pokémon illegal (always checked for trades).</summary>
+    ILLEGAL,
     NOT_FOUND,
     SERVER,
 }
@@ -40,7 +42,9 @@ public record TradeUserDTO(string Id, string Name);
 
 public record TradePokemonSummaryDTO(
     int Species, int Form, string Nickname, int Level, bool Shiny, int Gender,
-    string OtName, int Tid, int Version, string Format, string Fingerprint
+    string OtName, int Tid, int Version, string Format, string Fingerprint,
+    /// <summary>PKHeX legality checked by this app, for a pokémon offered to the current user. Null: not checked.</summary>
+    bool? Legal = null
 );
 
 public record TradeDTO(

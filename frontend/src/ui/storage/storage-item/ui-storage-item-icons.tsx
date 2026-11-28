@@ -1,5 +1,5 @@
 import { Box, Group, Stack } from '@mantine/core';
-import { ExternalLinkIcon, FileXIcon, HeartIcon } from 'lucide-react';
+import { CopyIcon, ExternalLinkIcon, FileXIcon, HeartIcon, ShieldXIcon } from 'lucide-react';
 import type React from 'react';
 import { UIAlphaIcon } from '../../icon/ui-alpha-icon';
 import { UIDynaIcon } from '../../icon/ui-dyna-icon';
@@ -28,12 +28,14 @@ export type UIStorageItemIconsProps = {
     isDuplicate?: boolean;
     attachBroken?: boolean;
     warning?: boolean;
+    /** Cannot be traded: another copy exists, or PKHeX finds it illegal. */
+    tradeBlock?: 'DUPLICATE' | 'ILLEGAL';
 };
 
 export const UIStorageItemIcons: React.FC<UIStorageItemIconsProps> = ({
     heldItem, isStarter, isAlpha, canGigantamax, isShiny, isN, level, party, nbrVariants = 0,
     hasDisabledVariant, isExternal, canEvolve, attached, needSynchronize,
-    isDuplicate, attachBroken, warning,
+    isDuplicate, attachBroken, warning, tradeBlock,
 }) => {
     return <Box className={classes.uiStorageItemIcons}>
         {heldItem && <Box pos='absolute' left={0} bottom={0}>
@@ -64,6 +66,10 @@ export const UIStorageItemIcons: React.FC<UIStorageItemIconsProps> = ({
         </Stack>
 
         <Group pos='absolute' top={4} right={4} justify='flex-end' gap={2}>
+            {tradeBlock && <UIIconWrapper variant='filled' color='yellow'>
+                {tradeBlock === 'DUPLICATE' ? <CopyIcon /> : <ShieldXIcon />}
+            </UIIconWrapper>}
+
             {isAlpha && <UIIconWrapper variant='transparent'>
                 <UIAlphaIcon />
             </UIIconWrapper>}
@@ -90,7 +96,7 @@ export const UIStorageItemIcons: React.FC<UIStorageItemIconsProps> = ({
 
             {isDuplicate && <UIPokedexIcons.Duplicate size='xs' />}
 
-            {warning && <UIPokedexIcons.Warn size='xs' />}
+            {warning && tradeBlock !== 'ILLEGAL' && <UIPokedexIcons.Warn size='xs' />}
         </Group>
     </Box>;
 };

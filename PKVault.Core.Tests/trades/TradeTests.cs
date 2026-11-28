@@ -127,6 +127,8 @@ public class TradeTests : IAsyncDisposable
             return Task.CompletedTask;
         }
 
+        public Task<List<TradeBlockDTO>> GetBlocked(string boxId) => Task.FromResult<List<TradeBlockDTO>>([]);
+
         public Task<List<string>> StoreIncoming(List<(string Id, string Format, byte[] Content)> pokemons)
         {
             Stored.AddRange(pokemons.Select(p => p.Id));
@@ -471,10 +473,41 @@ public class TradeTests : IAsyncDisposable
         Assert.Equal(sent.Upload.Fingerprint, back.Upload.Fingerprint);
     }
 
-    private static TradeLocalStorage LocalStorageOver(PkmVariantLoader variants)
+    private static TradeLocalStorage LocalStorageOver(PkmVariantLoader variants, Func<ImmutablePKM, bool>? isLegal = null)
     {
         var services = new ServiceCollection();
         services.AddScoped<IPkmVariantLoader>(_ => variants);
-        return new TradeLocalStorage(services.BuildServiceProvider());
+        return new TradeLocalStorage(services.BuildServiceProvider()) { IsLegal = isLegal ?? (_ => true) };
+    }
+
+    [Fact]
+    public async Task PrepareOutgoing_Illegal_IsRefused_EvenWhenLegalityChecksAreSkipped()
+    {
+        var (_, variants) = await NewReceiveAction(slotCount: 30, occupied: 1);
+        // the real PKHeX check: a made-up PK3 is not legal
+        var local = LocalStorageOver(variants, TradeLegality.IsLegal);
+        var first = (await variants.GetEntitiesByBox("1", 0)).Values.Single();
+
+        var ex = await Assert.ThrowsAsync<TradeException>(() => local.PrepareOutgoing(first.Id));
+        Assert.Equal(TradeError.ILLEGAL, ex.Error);
+    }
+
+    [Fact]
+    public async Task GetBlocked_ListsDuplicatesAndIllegal()
+    {
+        duplicateInSlot1 = Pkm(1000);
+        var (_, variants) = await NewReceiveAction(slotCount: 30, occupied: 3);
+        var local = LocalStorageOver(variants, pkm => pkm.PID != 1002);
+
+        var blocked = (await local.GetBlocked("1")).ToDictionary(b => b.PkmVariantId);
+
+        var slot0 = (await variants.GetEntitiesByBox("1", 0)).Values.Single();
+        var slot1 = (await variants.GetEntitiesByBox("1", 1)).Values.Single();
+        var slot2 = (await variants.GetEntitiesByBox("1", 2)).Values.Single();
+        Assert.Equal(TradeBlockReason.DUPLICATE, blocked[ slot0.Id ].Reason);
+        Assert.Equal(TradeBlockReason.DUPLICATE, blocked[ slot1.Id ].Reason);
+        Assert.Contains("slot 1", blocked[ slot1.Id ].Detail);
+        Assert.Equal(TradeBlockReason.ILLEGAL, blocked[ slot2.Id ].Reason);
+        Assert.Equal(3, blocked.Count);
     }
 }

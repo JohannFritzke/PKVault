@@ -47,7 +47,10 @@ public sealed class TradeService(
             var names = users.ToDictionary(u => u.Id, u => u.Name);
             string Name(string id) => names.TryGetValue(id, out var name) ? name : "";
 
-            var trades = tradesTask.Result.Select(t => new TradeDTO(
+            var records = tradesTask.Result;
+            var legal = await CheckOfferedLegality(config, token, records, ct);
+
+            var trades = records.Select(t => new TradeDTO(
                 Id: t.Id,
                 Status: t.Status,
                 Kind: t.Kind,
@@ -58,8 +61,12 @@ public sealed class TradeService(
                 IsSender: t.From == config.UserId,
                 Message: t.Message,
                 CounterMessage: t.CounterMessage,
-                Offered: t.Offered,
-                Countered: t.Countered,
+                Offered: t.Offered is { } offered && t.OfferedPokemonId != null && legal.TryGetValue(t.OfferedPokemonId, out var offeredLegal)
+                    ? offered with { Legal = offeredLegal }
+                    : t.Offered,
+                Countered: t.Countered is { } countered && t.CounteredPokemonId != null && legal.TryGetValue(t.CounteredPokemonId, out var counteredLegal)
+                    ? countered with { Legal = counteredLegal }
+                    : t.Countered,
                 Created: t.Created,
                 ExpiresAt: t.ExpiresAt,
                 ClosedAt: t.ClosedAt
@@ -86,6 +93,49 @@ public sealed class TradeService(
             return new(true, config.UserId, [], [], 0, ClaimRevision, TradeError.SERVER, ex.Message);
         }
     }
+
+    /// <summary>Checked once per pokémon in custody (its file never changes).</summary>
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<string, bool> offeredLegality = new();
+
+    /// <summary>
+    /// PKHeX legality of the pokémon the current user must decide on (offered to it, or given back on its offer).
+    /// The server cannot check it; the sender's app refuses illegal pokémon, this is for a modified app.
+    /// </summary>
+    private async Task<Dictionary<string, bool>> CheckOfferedLegality(CloudConfig config, string token, List<PocketBaseTradeRecord> trades, CancellationToken ct)
+    {
+        var toCheck = trades.SelectMany(t => t.Status switch
+        {
+            TradeStatus.OPEN when t.To == config.UserId => new[] { t.OfferedPokemonId },
+            TradeStatus.COUNTERED when t.From == config.UserId => [ t.CounteredPokemonId ],
+            _ => [],
+        }).OfType<string>().Distinct();
+
+        var result = new Dictionary<string, bool>();
+        foreach (var id in toCheck)
+        {
+            if (!offeredLegality.TryGetValue(id, out var isLegal))
+            {
+                try
+                {
+                    var record = await client.GetTradePokemon(config.ServerUrl, token, id, ct);
+                    var content = await client.DownloadTradePokemon(config.ServerUrl, token, record, ct);
+                    var pkm = TradeLocalStorage.Parse(content, record.Format);
+                    isLegal = pkm != null && TradeLegality.IsLegal(pkm);
+                    offeredLegality[ id ] = isLegal;
+                }
+                catch (Exception ex)
+                {
+                    Log.Warning(ex, $"Trades: could not check the legality of pokémon {id}");
+                    continue;
+                }
+            }
+            result[ id ] = isLegal;
+        }
+        return result;
+    }
+
+    /// <summary>Storage pokémon of a box that cannot be traded (duplicate or illegal).</summary>
+    public Task<List<TradeBlockDTO>> GetBlocked(string boxId) => Local.GetBlocked(boxId);
 
     public async Task<List<PokemonHistoryEntryDTO>> GetHistory(string pkmVariantId, CancellationToken ct)
     {
@@ -287,10 +337,15 @@ public interface ITradeLocalStorage
     Task DiscardPendingActions();
     /// <summary>Adds the pokémon to the storage and saves. Returns the ids actually stored.</summary>
     Task<List<string>> StoreIncoming(List<(string Id, string Format, byte[] Content)> pokemons);
+    /// <summary>Storage pokémon of a box that cannot be traded, and why.</summary>
+    Task<List<TradeBlockDTO>> GetBlocked(string boxId);
 }
 
 public sealed class TradeLocalStorage(IServiceProvider sp) : ITradeLocalStorage
 {
+    /// <summary>Overridable for tests (made-up test pokémon are not legal).</summary>
+    public Func<ImmutablePKM, bool> IsLegal { get; init; } = TradeLegality.IsLegal;
+
     public bool HasNoPendingActions()
     {
         try
@@ -327,33 +382,21 @@ public sealed class TradeLocalStorage(IServiceProvider sp) : ITradeLocalStorage
         if (slotVariants.Any(v => v.AttachedSaveId != null))
             throw new TradeException(TradeError.CANNOT_TRADE, "Pokémon attached to a save: detach it first");
 
-        // the same pokémon somewhere else (a save after "detach", or another storage slot): trading it would duplicate it
-        var hashes = slotVariants.Select(v => v.Hash).Where(h => !string.IsNullOrEmpty(h)).ToHashSet();
-        var elsewhereInStorage = (await loader.GetAllEntities()).Values
-            .FirstOrDefault(v => hashes.Contains(v.Hash) && (v.BoxId != entity.BoxId || v.BoxSlot != entity.BoxSlot));
-        if (elsewhereInStorage != null)
+        // the same pokémon somewhere else (a save, or another storage slot): trading it would duplicate it
+        var copies = await TradeCopyIndex.Build(scope.ServiceProvider, sp);
+        var otherCopy = copies.FindOtherCopy(slotVariants, entity.BoxId, entity.BoxSlot);
+        if (otherCopy != null)
         {
-            var boxLoader = scope.ServiceProvider.GetService<IBoxLoader>();
-            var box = boxLoader == null ? null : await boxLoader.GetEntity(elsewhereInStorage.BoxId);
-            var where = elsewhereInStorage.IsExternal ? "external files" : $"storage box \"{box?.Name ?? elsewhereInStorage.BoxId}\"";
-            Log.Warning($"Trades: {entity.Id} ({entity.BoxId}/{entity.BoxSlot}, hash {elsewhereInStorage.Hash}) has a copy {elsewhereInStorage.Id} at {elsewhereInStorage.BoxId}/{elsewhereInStorage.BoxSlot}"
-                + $" main={elsewhereInStorage.IsMain} external={elsewhereInStorage.IsExternal} attached={elsewhereInStorage.AttachedSaveId} file={elsewhereInStorage.Filepath}");
-            throw new TradeException(TradeError.DUPLICATE, $"Other copy: {where}, slot {elsewhereInStorage.BoxSlot + 1}");
-        }
-        var inSave = sp.GetService<ISavesLoadersService>()?.GetAllLoaders()
-            .FirstOrDefault(save => hashes.Any(hash => !save.Pkms.GetDtosByIdBase(hash).IsEmpty));
-        if (inSave != null)
-        {
-            var found = hashes.SelectMany(hash => inSave.Pkms.GetDtosByIdBase(hash).Values).FirstOrDefault();
-            Log.Warning($"Trades: {entity.Id} ({entity.BoxId}/{entity.BoxSlot}) has a copy in save {inSave.Save.Id} {inSave.Save.Metadata.FilePath}"
-                + $" box={found?.BoxId} slot={found?.BoxSlot} species={found?.Species} hashes={string.Join(",", hashes)}");
-            throw new TradeException(TradeError.DUPLICATE, $"Other copy: save {inSave.Save.Version} ({inSave.Save.OT}), box {found?.BoxId + 1}, slot {found?.BoxSlot + 1}");
+            Log.Warning($"Trades: {entity.Id} refused, other copy: {otherCopy}");
+            throw new TradeException(TradeError.DUPLICATE, $"Other copy: {otherCopy}");
         }
 
         var main = slotVariants.FirstOrDefault(v => v.IsMain) ?? entity;
         var pkm = await loader.GetPKM(main);
         if (!pkm.IsEnabled || pkm.IsEgg || pkm.Species == 0)
             throw new TradeException(TradeError.CANNOT_TRADE, "This pokémon cannot be traded");
+        if (!IsLegal(pkm))
+            throw new TradeException(TradeError.ILLEGAL, "PKHeX finds this pokémon illegal");
 
         return new(main.Id, new(
             Content: pkm.GetDecryptedDataParty(),
@@ -427,6 +470,38 @@ public sealed class TradeLocalStorage(IServiceProvider sp) : ITradeLocalStorage
         }
 
         return added;
+    }
+
+    public async Task<List<TradeBlockDTO>> GetBlocked(string boxId)
+    {
+        using var scope = sp.CreateScope();
+        var loader = scope.ServiceProvider.GetRequiredService<IPkmVariantLoader>();
+
+        var slots = await loader.GetEntitiesByBox(boxId);
+        if (slots.Count == 0)
+            return [];
+
+        var copies = await TradeCopyIndex.Build(scope.ServiceProvider, sp);
+        var blocked = new List<TradeBlockDTO>();
+        foreach (var (slot, byId) in slots)
+        {
+            var variants = byId.Values.ToList();
+            var main = variants.FirstOrDefault(v => v.IsMain) ?? variants[ 0 ];
+            if (main.IsExternal)
+                continue;   // external files cannot be traded anyway, and have their own icon
+
+            var otherCopy = copies.FindOtherCopy(variants, boxId, slot);
+            if (otherCopy != null)
+            {
+                blocked.Add(new(main.Id, TradeBlockReason.DUPLICATE, otherCopy));
+                continue;
+            }
+
+            var pkm = await loader.GetPKM(main);
+            if (pkm.IsEnabled && !pkm.IsEgg && !IsLegal(pkm))
+                blocked.Add(new(main.Id, TradeBlockReason.ILLEGAL, null));
+        }
+        return blocked;
     }
 
     public static ImmutablePKM? Parse(byte[] content, string format)

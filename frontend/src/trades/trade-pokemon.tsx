@@ -40,5 +40,6 @@ export const TradePokemon: React.FC<TradePokemonProps> = ({ pokemon, emptyLabel,
             t('trades.pokemon.level', { level: pokemon.level }),
             pokemon.otName && t('trades.pokemon.ot', { name: pokemon.otName }),
         ].filter(Boolean).join(' · ')}
+        warning={pokemon.legal === false ? t('trades.pokemon.illegal') : undefined}
     />;
 };

@@ -64,6 +64,22 @@ public partial class PocketBaseClient
         ))];
     }
 
+    /// <summary>A pokémon in custody (visible to the owner and both sides of its trade).</summary>
+    public async Task<PocketBaseTradePokemonRecord> GetTradePokemon(string serverUrl, string token, string pokemonId, CancellationToken ct)
+    {
+        using var doc = await SendJson(HttpMethod.Get,
+            $"{serverUrl}/api/collections/{TradePokemonCollection}/records/{Uri.EscapeDataString(pokemonId)}", null, token, ct);
+        var item = doc.RootElement;
+        return new(
+            Id: Str(item, "id") ?? "",
+            CollectionId: Str(item, "collectionId") ?? "",
+            File: Str(item, "file") ?? "",
+            Format: Str(item, "format") ?? "",
+            Species: Int(item, "species"),
+            Trade: Str(item, "trade")
+        );
+    }
+
     public async Task<byte[]> DownloadTradePokemon(string serverUrl, string token, PocketBaseTradePokemonRecord record, CancellationToken ct)
     {
         string fileToken;
@@ -152,6 +168,8 @@ public partial class PocketBaseClient
         CounterMessage: Str(item, "counterMessage"),
         Offered: ReadSummary(item, "offeredSummary"),
         Countered: ReadSummary(item, "counteredSummary"),
+        OfferedPokemonId: Str(item, "offered"),
+        CounteredPokemonId: Str(item, "countered"),
         Created: ParseDate(Str(item, "created")),
         ExpiresAt: ParseDate(Str(item, "expiresAt")),
         ClosedAt: Str(item, "closedAt") is string closed ? ParseDate(closed) : null
@@ -189,7 +207,8 @@ public partial class PocketBaseClient
 public record PocketBaseTradeRecord(
     string Id, string From, string To, TradeStatus Status, TradeKind Kind, string? Message, string? CounterMessage,
     TradePokemonSummaryDTO? Offered, TradePokemonSummaryDTO? Countered,
-    DateTime Created, DateTime ExpiresAt, DateTime? ClosedAt
+    DateTime Created, DateTime ExpiresAt, DateTime? ClosedAt,
+    string? OfferedPokemonId = null, string? CounteredPokemonId = null
 );
 
 public record PocketBaseTradePokemonRecord(string Id, string CollectionId, string File, string Format, int Species, string? Trade);

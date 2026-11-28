@@ -5,7 +5,8 @@ import React from 'react';
 import { usePkmIndex } from '../../../data/hooks/use-pkm-index';
 import { type PkmVariantDTO, type TradeActionResultDTO } from '../../../data/sdk/model';
 import { useTradeOffer, useTradeStatus } from '../../../data/sdk/trade/trade.gen';
-import { tradeErrorKeys } from '../../../trades/trade-util';
+import { tradeBlockText, tradeErrorKeys } from '../../../trades/trade-util';
+import { useTradeBlock } from '../../../trades/use-trade-blocked';
 import { useTranslate } from '../../../translate/i18n';
 import { UIButton } from '../../../ui/form/button/ui-button';
 import { UISelect } from '../../../ui/form/select/ui-select';
@@ -30,23 +31,24 @@ export const OfferTradeButton: React.FC<ActionButtonDefaultProps> = ({ pkmIds, s
     const pkmIndexQuery = usePkmIndex(null,
         useSelectCallback(data => {
             const pkm = data.data.byId[ pkmIds[ 0 ] ?? '' ] as PkmVariantDTO | undefined;
-            return pkm && pick(pkm, [ 'id', 'isExternal', 'attachedSaveId', 'isEnabled', 'isEgg', 'canDelete' ]);
+            return pkm && pick(pkm, [ 'id', 'boxId', 'isExternal', 'attachedSaveId', 'isEnabled', 'isEgg', 'canDelete' ]);
         }, [ pkmIds ]),
         { enabled: saveId === null });
     const pkm = pkmIndexQuery.data;
+    const block = useTradeBlock(saveId === null ? pkm?.boxId.toString() : undefined, pkm?.id);
 
     if (saveId !== null || pkmIds.length !== 1 || !pkm || !loggedIn)
         return null;
 
     const attached = pkm.attachedSaveId !== undefined && pkm.attachedSaveId !== null;
-    const canTrade = !attached && !pkm.isExternal && pkm.isEnabled && !pkm.isEgg && pkm.canDelete;
+    const canTrade = !attached && !block && !pkm.isExternal && pkm.isEnabled && !pkm.isEgg && pkm.canDelete;
 
     return <UIPopover
         position='left'
         nested
         dropdown={canTrade && <OfferTradeForm pkmVariantId={pkm.id} />}
     >
-        <Tooltip label={attached ? t('trades.offer.attached') : t('trades.offer.description')} multiline maw={260}>
+        <Tooltip label={block ? tradeBlockText(t, block) : attached ? t('trades.offer.attached') : t('trades.offer.description')} multiline maw={260}>
             <UIButton
                 name='offer-trade'
                 controlLabel={t('trades.offer')}

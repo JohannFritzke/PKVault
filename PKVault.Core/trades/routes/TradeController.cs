@@ -15,6 +15,13 @@ public class TradeController(TradeService tradeService)
         return await tradeService.GetStatus(CancellationToken.None);
     }
 
+    /// <summary>Storage pokémon of a box that cannot be traded (duplicate or illegal), with the reason.</summary>
+    [HttpGet("blocked/{boxId}")]
+    public async Task<List<TradeBlockDTO>> Blocked(string boxId)
+    {
+        return await tradeService.GetBlocked(boxId);
+    }
+
     /// <summary>Owners of this pokémon, from trades.</summary>
     [HttpGet("history/{pkmVariantId}")]
     public async Task<List<PokemonHistoryEntryDTO>> History(string pkmVariantId)

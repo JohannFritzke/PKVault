@@ -1,4 +1,5 @@
-import { EntityContext, TradeError } from '../data/sdk/model';
+import type { TFunction } from 'i18next';
+import { EntityContext, TradeBlockReason, TradeError, type TradeBlockDTO } from '../data/sdk/model';
 
 const formatContexts: Record<string, EntityContext> = {
     pk1: EntityContext.Gen1,
@@ -30,6 +31,12 @@ export const tradeErrorKeys = {
     [ TradeError.PENDING_CHANGES ]: 'trades.error.pending-changes',
     [ TradeError.CANNOT_TRADE ]: 'trades.error.cannot-trade',
     [ TradeError.DUPLICATE ]: 'trades.error.duplicate',
+    [ TradeError.ILLEGAL ]: 'trades.error.illegal',
     [ TradeError.NOT_FOUND ]: 'trades.error.not-found',
     [ TradeError.SERVER ]: 'trades.error.server',
 } as const;
+
+/** Why a storage pokémon cannot be traded, for tooltips. */
+export const tradeBlockText = (t: TFunction, block: TradeBlockDTO) => block.reason === TradeBlockReason.DUPLICATE
+    ? t('trades.block.duplicate', { where: block.detail ?? '' })
+    : t('trades.block.illegal');

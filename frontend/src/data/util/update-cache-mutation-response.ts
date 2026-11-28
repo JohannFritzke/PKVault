@@ -1,4 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
+import { invalidateTradeBlocked } from '../../trades/use-trade-blocked';
 import { filterIsDefined } from '../../util/filter-is-defined';
 import { getPkmLegalityQueryKey, type PkmLegalityQueryData } from '../hooks/use-pkm-legality';
 import { updatePkmSaveCache } from '../hooks/use-pkm-save-index';
@@ -59,6 +60,10 @@ export const updateCacheMutationResponse = (client: QueryClient, data: unknown) 
         saveInfos,
         backups,
     } = data.data;
+
+    if (mainPkmVariants || saves || invalidateAllSaves) {
+        void invalidateTradeBlocked(client);
+    }
 
     if (settings) {
         client.setQueryData(getSettingsGetQueryKey(), {

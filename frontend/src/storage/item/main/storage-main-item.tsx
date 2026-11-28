@@ -2,10 +2,11 @@ import React from 'react';
 import { usePkmAttachState } from '../../../data/hooks/use-pkm-attach-state';
 import { usePkmLegalityMap } from '../../../data/hooks/use-pkm-legality';
 import { usePkmVariantIndex } from '../../../data/hooks/use-pkm-variant-index';
-import { Gender } from '../../../data/sdk/model';
+import { Gender, TradeBlockReason } from '../../../data/sdk/model';
 import { withErrorCatcher } from '../../../error/with-error-catcher';
 import { Route } from '../../../routes/storage';
 import { UIStorageItemIcons } from '../../../ui/storage/storage-item/ui-storage-item-icons';
+import { useTradeBlock } from '../../../trades/use-trade-blocked';
 import { pick } from '../../../util/pick';
 import { useSelectCallback } from '../../../util/use-select-callback';
 import type { MoveContainerValue } from '../../move/move-container-fns';
@@ -64,6 +65,8 @@ export const StorageMainItem: React.FC<StorageMainItemProps> = withErrorCatcher(
 
         const variantsIds = variantInfos?.variants.map(variant => variant.id) ?? [];
 
+        const tradeBlock = useTradeBlock(variantInfos?.mainVariant.boxId.toString(), variantInfos?.mainVariant.id);
+
         const pkmLegalityMapQuery = usePkmLegalityMap(variantsIds);
         const pkmLegalityMap = Object.values(pkmLegalityMapQuery.data?.data ?? {});
 
@@ -99,6 +102,7 @@ export const StorageMainItem: React.FC<StorageMainItemProps> = withErrorCatcher(
             isShadow={isShadow}
             name={nickname}
             level={level}
+            tradeBlocked={!!tradeBlock}
             {...rest}
             icons={<UIStorageItemIcons
                 isAlpha={isAlpha}
@@ -107,6 +111,7 @@ export const StorageMainItem: React.FC<StorageMainItemProps> = withErrorCatcher(
                 isN={nSparkle}
                 isExternal={isExternal}
                 warning={pkmLegalityMap.some(value => !value.isValid)}
+                tradeBlock={tradeBlock && (tradeBlock.reason === TradeBlockReason.DUPLICATE ? 'DUPLICATE' : 'ILLEGAL')}
                 nbrVariants={variants.length}
                 hasDisabledVariant={hasDisabledVariant}
                 attached={isAttached}

@@ -33,3 +33,12 @@
 .ui-storage-item-base:not([data-disabled="true"]):hover:not([data-selected="true"], [data-focused="true"]) {
   outline: 1px solid var(--mantine-color-default-border);
 }
+
+/* cannot be traded (duplicate or illegal) */
+.ui-storage-item-base[data-trade-block] {
+  border: 1px dashed var(--mantine-color-yellow-6);
+}
+
+.ui-storage-item-base[data-trade-block] .species {
+  opacity: 0.55;
+}
